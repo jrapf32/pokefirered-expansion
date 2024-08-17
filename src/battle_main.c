@@ -28,7 +28,6 @@
 #include "party_menu.h"
 #include "pokeball.h"
 #include "pokedex.h"
-#include "quest_log.h"
 #include "random.h"
 #include "recorded_battle.h"
 #include "roamer.h"
@@ -2077,7 +2076,6 @@ static void EndLinkBattleInSteps(void)
         if (!gPaletteFade.active)
         {
             SetMainCallback2(gMain.savedCallback);
-            TrySetQuestLogLinkBattleEvent();
             FreeMonSpritesGfx();
             FreeBattleSpritesData();
             FreeBattleResources();
@@ -4931,7 +4929,6 @@ static void HandleEndTurn_FinishBattle(void)
                 }
             }
         }
-        TrySetQuestLogBattleEvent();
         if (gBattleTypeFlags & BATTLE_TYPE_TRAINER)
             ClearRematchStateByTrainerId();
         RecordedBattle_SetPlaybackFinished();

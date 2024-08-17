@@ -35,7 +35,6 @@
 #include "constants/weather.h"
 #include "constants/union_room.h"
 #include "constants/trade.h"
-#include "constants/quest_log.h"
 #include "constants/daycare.h"
 #include "constants/easy_chat.h"
 #include "constants/trainer_card.h"
@@ -1098,7 +1097,6 @@ EventScript_OutOfCenterPartyHeal::
 EventScript_WallTownMap::
 	lockall
 	msgbox Text_ATownMap
-	goto_if_questlog EventScript_ReleaseEnd
 	fadescreen FADE_TO_BLACK
 	special ShowTownMap
 	waitstate

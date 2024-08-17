@@ -9,7 +9,6 @@
 #include "save_location.h"
 #include "berry_powder.h"
 #include "overworld.h"
-#include "quest_log.h"
 #include "constants/event_objects.h"
 
 #define SAVEBLOCK_MOVE_RANGE    128
@@ -77,7 +76,6 @@ void SetSaveBlocksPointers(void)
 {
     u32 offset;
     struct SaveBlock1** sav1_LocalVar = &gSaveBlock1Ptr;
-    void *oldSave = (void *)gSaveBlock1Ptr;
 
     offset = (Random()) & ((SAVEBLOCK_MOVE_RANGE - 1) & ~3);
 
@@ -86,7 +84,6 @@ void SetSaveBlocksPointers(void)
     gPokemonStoragePtr = (void *)(&gPokemonStorage) + offset;
 
     SetBagPocketsPointers();
-    QL_AddASLROffset(oldSave);
 }
 
 void MoveSaveBlocks_ResetHeap(void)

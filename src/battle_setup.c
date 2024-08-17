@@ -8,7 +8,6 @@
 #include "pokemon.h"
 #include "load_save.h"
 #include "safari_zone.h"
-#include "quest_log.h"
 #include "script.h"
 #include "script_pokemon_util.h"
 #include "strings.h"
@@ -902,13 +901,11 @@ const u8 *BattleSetup_ConfigureTrainerBattle(const u8 *data)
         SetMapVarsToTrainer();
         return EventScript_TryDoDoubleTrainerBattle;
     case TRAINER_BATTLE_REMATCH_DOUBLE:
-        QL_FinishRecordingScene();
         TrainerBattleLoadArgs(sDoubleBattleParams, data);
         SetMapVarsToTrainer();
         gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
         return EventScript_TryDoDoubleRematchBattle;
     case TRAINER_BATTLE_REMATCH:
-        QL_FinishRecordingScene();
         TrainerBattleLoadArgs(sOrdinaryBattleParams, data);
         SetMapVarsToTrainer();
         gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
@@ -1086,7 +1083,6 @@ static void CB2_EndTrainerBattle(void)
             }
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
         else
         {
@@ -1094,7 +1090,6 @@ static void CB2_EndTrainerBattle(void)
             DowngradeBadPoison();
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
 
     }
@@ -1114,7 +1109,6 @@ static void CB2_EndTrainerBattle(void)
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             DowngradeBadPoison();
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
     }
 }
@@ -1135,7 +1129,6 @@ static void CB2_EndRematchBattle(void)
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
         SetBattledTrainerFlag();
         ClearRematchStateOfLastTalked();
-        ResetDeferredLinkEvent();
         DowngradeBadPoison();
     }
 }
@@ -1184,8 +1177,7 @@ void PlayTrainerEncounterMusic(void)
     else
         trainerId = gTrainerBattleOpponent_B;
 
-    if (!QL_IS_PLAYBACK_STATE
-     && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
+    if (sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
      && sTrainerBattleMode != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
     {
         switch (GetTrainerEncounterMusicId(trainerId))

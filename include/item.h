@@ -67,7 +67,6 @@ u16 ItemId_GetSecondaryId(u16 itemId);
 u32 ItemId_GetFlingPower(u32 itemId);
 void ClearBag(void);
 void ClearPCItemSlots(void);
-void TrySetObtainedItemQuestLogEvent(u16 itemId);
 bool8 AddBagItem(u16 itemId, u16 amount);
 
 void SortPocketAndPlaceHMsFirst(struct BagPocket * pocket);

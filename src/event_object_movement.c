@@ -19,7 +19,6 @@
 #include "metatile_behavior.h"
 #include "overworld.h"
 #include "pokeball.h"
-#include "quest_log.h"
 #include "random.h"
 #include "script.h"
 #include "trainer_see.h"
@@ -107,7 +106,6 @@ static bool8 MovementType_Buried_Callback(struct ObjectEvent *, struct Sprite *)
 static u8 MovementType_RaiseHandAndStop_Callback(struct ObjectEvent *, struct Sprite *);
 static u8 MovementType_RaiseHandAndJump_Callback(struct ObjectEvent *, struct Sprite *);
 static u8 MovementType_RaiseHandAndSwim_Callback(struct ObjectEvent *, struct Sprite *);
-static void QuestLogObjectEventExecHeldMovementAction(struct ObjectEvent *, struct Sprite *);
 static void VirtualObject_UpdateAnim(struct Sprite *sprite);
 static u8 LoadDynamicFollowerPalette(u16 species, u8 form, bool32 shiny);
 static u16 PackGraphicsId(const struct ObjectEventTemplate *template);
@@ -1871,11 +1869,7 @@ void CopyObjectGraphicsInfoToSpriteTemplate(u16 graphicsId, void (*callback)(str
     spriteTemplate->anims = graphicsInfo->anims;
     spriteTemplate->images = graphicsInfo->images;
     spriteTemplate->affineAnims = graphicsInfo->affineAnims;
-    
-    if (ScriptContext_IsEnabled() != TRUE && QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING)
-        spriteTemplate->callback = QL_UpdateObject;
-    else
-        spriteTemplate->callback = callback;
+    spriteTemplate->callback = callback;
     
     *subspriteTables = graphicsInfo->subspriteTables;
 }
@@ -2074,7 +2068,6 @@ static u8 LoadDynamicFollowerPalette(u16 species, u8 form, bool32 shiny)
             spritePalette.data = (void*)gDecompressionBuffer;
         }
         paletteNum = LoadSpritePalette(&spritePalette);
-        ApplyGlobalFieldPaletteTint(paletteNum);
     }
     else
 #endif //OW_POKEMON_OBJECT_EVENTS == TRUE && OW_PKMN_OBJECTS_SHARE_PALETTES == FALSE
@@ -2089,7 +2082,6 @@ static u8 LoadDynamicFollowerPalette(u16 species, u8 form, bool32 shiny)
         // Load compressed palette
         LoadCompressedSpritePaletteWithTag(palette, species);
         paletteNum = IndexOfSpritePaletteTag(species); // Tag is always present
-        ApplyGlobalFieldPaletteTint(paletteNum);
     }
 
     if (gWeatherPtr->currWeather != WEATHER_FOG_HORIZONTAL) // don't want to weather blend in fog
@@ -3011,7 +3003,6 @@ static u8 LoadSpritePaletteIfTagExists(const struct SpritePalette *spritePalette
     if (paletteNum != 0xFF) // don't load twice; return
         return paletteNum;
     paletteNum = LoadSpritePalette(spritePalette);
-    ApplyGlobalFieldPaletteTint(paletteNum);
     return paletteNum;
 }
 
@@ -3020,7 +3011,6 @@ void PatchObjectPalette(u16 paletteTag, u8 paletteSlot)
     u8 paletteIndex = FindObjectEventPaletteIndexByTag(paletteTag);
 
     LoadPalette(sObjectEventSpritePalettes[paletteIndex].data, OBJ_PLTT_ID(paletteSlot), PLTT_SIZE_4BPP);
-    ApplyGlobalFieldPaletteTint(paletteSlot);
 }
 
 void PatchObjectPaletteRange(const u16 *paletteTags, u8 minSlot, u8 maxSlot)
@@ -6300,9 +6290,7 @@ bool8 ObjectEventIsHeldMovementActive(struct ObjectEvent *objectEvent)
 
 bool8 ObjectEventSetHeldMovement(struct ObjectEvent *objectEvent, u8 movementActionId)
 {
-    if (QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING)
-        ObjectEventClearHeldMovementIfActive(objectEvent);
-    else if (ObjectEventIsMovementOverridden(objectEvent))
+    if (ObjectEventIsMovementOverridden(objectEvent))
         return TRUE;
 
     UnfreezeObjectEvent(objectEvent);
@@ -6368,27 +6356,6 @@ void UpdateObjectEventCurrentMovement(struct ObjectEvent *objectEvent, struct Sp
         ObjectEventExecHeldMovementAction(objectEvent, sprite);
     else if (!objectEvent->frozen)
         while (callback(objectEvent, sprite));
-
-    DoGroundEffects_OnBeginStep(objectEvent, sprite);
-    DoGroundEffects_OnFinishStep(objectEvent, sprite);
-    UpdateObjectEventSpriteAnimPause(objectEvent, sprite);
-    UpdateObjectEventVisibility(objectEvent, sprite);
-    ObjectEventUpdateSubpriority(objectEvent, sprite);
-}
-
-void QL_UpdateObjectEventCurrentMovement(struct ObjectEvent *objectEvent, struct Sprite *sprite)
-{
-    DoGroundEffects_OnSpawn(objectEvent, sprite);
-    TryEnableObjectEventAnim(objectEvent, sprite);
-
-    if (ObjectEventIsHeldMovementActive(objectEvent) && !sprite->animBeginning)
-        QuestLogObjectEventExecHeldMovementAction(objectEvent, sprite);
-    
-    if (MetatileBehavior_IsIce_2(objectEvent->currentMetatileBehavior) == TRUE
-        || MetatileBehavior_IsTrickHouseSlipperyFloor(objectEvent->currentMetatileBehavior) == TRUE)
-        objectEvent->disableAnim = TRUE;
-    else
-        objectEvent->disableAnim = FALSE;
 
     DoGroundEffects_OnBeginStep(objectEvent, sprite);
     DoGroundEffects_OnFinishStep(objectEvent, sprite);
@@ -6495,16 +6462,6 @@ static void ObjectEventExecHeldMovementAction(struct ObjectEvent *objectEvent, s
     }
 }
 
-static void QuestLogObjectEventExecHeldMovementAction(struct ObjectEvent *objectEvent, struct Sprite *sprite)
-{
-    if (sMovementActionFuncs[objectEvent->movementActionId][sprite->data[2]](objectEvent, sprite))
-    {
-        objectEvent->heldMovementFinished = TRUE;
-        if (objectEvent->graphicsId == OBJ_EVENT_GFX_PUSHABLE_BOULDER)
-            HandleBoulderFallThroughHole(objectEvent);
-    }
-}
-
 static bool8 ObjectEventExecSingleMovementAction(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     if (sMovementActionFuncs[objectEvent->movementActionId][sprite->data[2]](objectEvent, sprite))
@@ -6520,9 +6477,6 @@ static void ObjectEventSetSingleMovement(struct ObjectEvent *objectEvent, struct
 {
     objectEvent->movementActionId = movementActionId;
     sprite->data[2] = 0;
-    
-    if (gQuestLogPlaybackState == QL_PLAYBACK_STATE_RECORDING)
-        QuestLogRecordNPCStep(objectEvent->localId, objectEvent->mapNum, objectEvent->mapGroup, movementActionId);
 }
 
 static void FaceDirection(struct ObjectEvent *objectEvent, struct Sprite *sprite, u8 direction)

@@ -156,7 +156,6 @@ static void LoadObjectRegularReflectionPalette(struct ObjectEvent *objectEvent, 
         else
             ApplyIceFilter(mainSprite->oam.paletteNum, filteredData);
         paletteNum = LoadSpritePalette(&filteredPal);
-        ApplyGlobalFieldPaletteTint(paletteNum);
         UpdateSpritePaletteWithWeather(paletteNum);
     }
     sprite->oam.paletteNum = paletteNum;
@@ -171,7 +170,6 @@ static void LoadObjectHighBridgeReflectionPalette(struct ObjectEvent *objectEven
     struct SpritePalette bluePalette = {.tag = HIGH_BRIDGE_PAL_TAG, .data = blueData};
     CpuFill16(0x55C9, blueData, PLTT_SIZE_4BPP);
     sprite->oam.paletteNum = LoadSpritePalette(&bluePalette);
-    ApplyGlobalFieldPaletteTint(sprite->oam.paletteNum);
     UpdateSpritePaletteWithWeather(sprite->oam.paletteNum);
 }
 
@@ -208,7 +206,6 @@ static void UpdateObjectReflectionSprite(struct Sprite *reflectionSprite)
             else
                 ApplyIceFilter(mainSprite->oam.paletteNum, filteredData);
             paletteNum = LoadSpritePalette(&filteredPal);
-            ApplyGlobalFieldPaletteTint(paletteNum);
             UpdateSpritePaletteWithWeather(paletteNum);
         }
         reflectionSprite->oam.paletteNum = paletteNum;

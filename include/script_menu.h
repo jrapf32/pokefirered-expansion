@@ -17,7 +17,6 @@ void DrawVerticalMultichoiceMenuInternal(u8 left, u8 top, u8 mcId, u8 ignoreBpre
 int ConvertPixelWidthToTileWidth(int width);
 
 bool8 (*ScriptMenu_HidePokemonPic(void))(void);
-void QL_DestroyAbortedDisplay(void);
 void PicboxCancel(void);
 
 #endif //GUARD_SCRIPT_MENU_H

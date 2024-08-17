@@ -1,5 +1,4 @@
 EventScript_CutTree::
-	goto_if_questlog EventScript_ReleaseEnd
 	lockall
 	goto_if_unset FLAG_BADGE02_GET, EventScript_CantCutTree
 	checkpartymove MOVE_CUT
@@ -62,7 +61,6 @@ EventScript_FldEffRockSmash::
 	goto EventScript_RockSmashCommon
 
 EventScript_RockSmash::
-	goto_if_questlog EventScript_ReleaseEnd
 	lockall
 	goto_if_unset FLAG_BADGE06_GET, EventScript_CantSmashRock
 	checkpartymove MOVE_ROCK_SMASH
@@ -227,7 +225,6 @@ Text_MonMaySmashRock::
 	.string "may be able to smash it.$"
 
 EventScript_StrengthBoulder::
-	goto_if_questlog EventScript_ReleaseEnd
 	lockall
 	goto_if_unset FLAG_BADGE04_GET, EventScript_CantMoveBoulder
 	goto_if_set FLAG_SYS_USE_STRENGTH, EventScript_AlreadyUsedStrength
@@ -286,7 +283,6 @@ Text_StrengthMadeMovingBouldersPossible::
 	.string "boulders around.$"
 
 EventScript_Waterfall::
-	goto_if_questlog EventScript_ReleaseEnd
 	lockall
 	checkpartymove MOVE_WATERFALL
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_WaterCrashingDown

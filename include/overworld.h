@@ -101,9 +101,6 @@ void SetGameStat(u8 statId, u32 value);
 
 void CB2_ContinueSavedGame(void);
 void Overworld_SetWarpDestinationFromWarp(struct WarpData *);
-void CB2_SetUpOverworldForQLPlayback(void);
-void CB2_SetUpOverworldForQLPlaybackWithWarpExit(void);
-void CB2_EnterFieldFromQuestLog(void);
 void Overworld_PlaySpecialMapMusic(void);
 
 u8 GetCurrentRegionMapSectionId(void);
@@ -116,7 +113,6 @@ void CleanupOverworldWindowsAndTilemaps(void);
 u32 ComputeWhiteOutMoneyLoss(void);
 
 extern u8 gDisableMapMusicChangeOnMapLoad;
-extern u8 gGlobalFieldTintMode;
 
 extern bool8 (* gFieldCallback2)(void);
 
@@ -145,7 +141,7 @@ void CB2_ReturnToFieldCableClub(void);
 void ResetGameStats(void);
 
 void Overworld_CreditsMainCB(void);
-bool32 Overworld_DoScrollSceneForCredits(u8 *, const struct CreditsOverworldCmd *, u8);
+bool32 Overworld_DoScrollSceneForCredits(u8 *state_p, const struct CreditsOverworldCmd * script);
 
 bool32 IsSendingKeysOverCable(void);
 

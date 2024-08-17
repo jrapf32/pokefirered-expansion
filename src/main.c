@@ -16,7 +16,6 @@
 #include "scanline_effect.h"
 #include "save_failed_screen.h"
 #include "test_runner.h"
-#include "quest_log.h"
 
 extern u32 intr_main[];
 
@@ -218,16 +217,10 @@ static void InitMainCallbacks(void)
     gSaveBlock2Ptr = &gSaveBlock2;
     gSaveBlock1Ptr = &gSaveBlock1;
     gSaveBlock2.encryptionKey = 0;
-    gQuestLogPlaybackState = QL_PLAYBACK_STATE_STOPPED;
 }
 
 static void CallCallbacks(void)
 {
-// #if TESTING || DEBUG_BATTLE_MENU == TRUE // test framework not working with help system
-//     if (!RunSaveFailedScreen())
-// #else
-//     if (!RunSaveFailedScreen() && !RunHelpSystemCallback())
-// #endif
     if (!RunSaveFailedScreen())
     {
         if (gMain.callback1)
