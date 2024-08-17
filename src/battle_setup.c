@@ -1,7 +1,6 @@
 #include "global.h"
 #include "task.h"
 #include "battle_setup.h"
-#include "help_system.h"
 #include "overworld.h"
 #include "item.h"
 #include "sound.h"
@@ -239,7 +238,6 @@ static void Task_BattleStart(u8 taskId)
     case 0:
         if (!FldEffPoison_IsActive())
         {
-            HelpSystem_Disable();
             BattleTransition_StartOnField(tTransition);
             ++tState;
         }
@@ -247,7 +245,6 @@ static void Task_BattleStart(u8 taskId)
     case 1:
         if (IsBattleTransitionDone() == TRUE)
         {
-            HelpSystem_Enable();
             CleanupOverworldWindowsAndTilemaps();
             SetMainCallback2(CB2_InitBattle);
             RestartWildEncounterImmunitySteps();
@@ -275,7 +272,6 @@ static void Task_BattleStart_Debug(u8 taskId)
     case 0:
         if (!FldEffPoison_IsActive()) // is poison not active?
         {
-            HelpSystem_Disable();
             BattleTransition_StartOnField(tTransition);
             // ClearMirageTowerPulseBlendEffect();
             tState++; // go to case 1.
@@ -284,7 +280,6 @@ static void Task_BattleStart_Debug(u8 taskId)
     case 1:
         if (IsBattleTransitionDone() == TRUE)
         {
-            HelpSystem_Enable();
             CleanupOverworldWindowsAndTilemaps();
             SetMainCallback2(CB2_InitBattle);
             RestartWildEncounterImmunitySteps();

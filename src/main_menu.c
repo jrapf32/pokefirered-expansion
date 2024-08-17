@@ -12,7 +12,6 @@
 #include "mystery_gift_menu.h"
 #include "strings.h"
 #include "title_screen.h"
-#include "help_system.h"
 #include "pokedex.h"
 #include "text_window.h"
 #include "text_window_graphics.h"
@@ -542,7 +541,6 @@ static void Task_ExecuteMainMenuSelection(u8 taskId)
             break;
         case MAIN_MENU_MYSTERYGIFT:
             SetMainCallback2(CB2_InitMysteryGift);
-            HelpSystem_Disable();
             FreeAllWindowBuffers();
             DestroyTask(taskId);
             break;
@@ -712,7 +710,7 @@ static void PrintDexCount(void)
         else
             dexcount = GetKantoPokedexCount(FLAG_GET_CAUGHT);
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_CONTINUE, FONT_NORMAL, 2, 50, sTextColor2, -1, gText_Pokedex);
-        ptr = ConvertIntToDecimalStringN(strbuf, dexcount, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ptr = ConvertIntToDecimalStringN(strbuf, dexcount, STR_CONV_MODE_LEFT_ALIGN, 4);
         StringAppend(ptr, gTextJPDummy_Hiki);
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_CONTINUE, FONT_NORMAL, 62, 50, sTextColor2, -1, strbuf);
     }

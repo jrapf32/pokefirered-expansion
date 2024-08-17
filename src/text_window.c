@@ -1,9 +1,10 @@
 #include "global.h"
 #include "gflib.h"
+#include "new_menu_helpers.h"
 #include "text_window.h"
 #include "text_window_graphics.h"
-#include "help_message.h"
-#include "new_menu_helpers.h"
+
+const u8 gHelpMessageWindow_Gfx[] = INCBIN_U8("graphics/help_system/msg_window.4bpp");
 
 static void LoadUserWindowGfxByFrame(u8 windowId, u8 frameType, u16 destOffset, u8 palOffset);
 

@@ -6,13 +6,13 @@
 #include "task.h"
 #include "new_menu_helpers.h"
 #include "event_data.h"
-#include "help_system.h"
 #include "menu_indicators.h"
 #include "overworld.h"
 #include "strings.h"
 #include "menu.h"
 #include "pokedex_screen.h"
 #include "data.h"
+#include "list_menu.h"
 #include "pokedex.h"
 #include "trainer_pokemon_sprites.h"
 #include "decompress.h"
@@ -962,7 +962,6 @@ void CB2_OpenPokedexFromStartMenu(void)
     SetGpuReg(REG_OFFSET_BLDALPHA, 0);
     SetGpuReg(REG_OFFSET_BLDY, 0);
     SetMainCallback2(CB2_PokedexScreen);
-    SetHelpContext(HELPCONTEXT_POKEDEX);
 }
 
 #define FREE_IF_NOT_NULL(ptr0) ({ void *ptr = (ptr0); if (ptr) Free(ptr); })

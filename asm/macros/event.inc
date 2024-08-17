@@ -990,6 +990,11 @@
 	.byte \textTop
 	.endm
 
+	@ Does nothing.
+	.macro nop0x79
+	.byte 0x79
+	.endm
+
 	@ Gives the player a Pokémon of the specified species and level, and allows to customize extra parameters.
 	@ VAR_RESULT will be set to MON_GIVEN_TO_PARTY, MON_GIVEN_TO_PC, or MON_CANT_GIVE depending on the outcome.
 	.macro givemon species:req, level:req, item, ball, nature, abilityNum, gender, hpEv, atkEv, defEv, speedEv, spAtkEv, spDefEv, hpIv, atkIv, defIv, speedIv, spAtkIv, spDefIv, move1, move2, move3, move4, isShiny, ggMaxFactor, teraType
@@ -1667,14 +1672,13 @@
 	.byte \color
 	.endm
 
-	@ Displays the help menu with the given text.
-	.macro loadhelp msg:req
+	@ Does nothing.
+	.macro nop0xc8
 	.byte 0xc8
-	.4byte \msg
 	.endm
 
-	@ Erases the help menu
-	.macro unloadhelp
+	@ Does nothing.
+	.macro nop0xc9
 	.byte 0xc9
 	.endm
 

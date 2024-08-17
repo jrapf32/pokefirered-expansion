@@ -1,6 +1,5 @@
 #include "global.h"
 #include "gflib.h"
-#include "help_message.h"
 #include "menu.h"
 #include "menu_helpers.h"
 #include "new_menu_helpers.h"
@@ -426,7 +425,6 @@ void InitStandardTextBoxWindows(void)
 {
     InitWindows(sStandardTextBox_WindowTemplates);
     sStartMenuWindowId = 0xFF;
-    MapNamePopupWindowIdSetDummy();
     InitPopupWindows();
 }
 
@@ -709,17 +707,6 @@ void RemoveStartMenuWindow(void)
 u16 GetStdWindowBaseTileNum(void)
 {
     return STD_WINDOW_BASE_TILE_NUM;
-}
-
-void DrawHelpMessageWindowWithText(const u8 * text)
-{
-    LoadHelpMessageWindowGfx(CreateHelpMessageWindow(), DLG_WINDOW_BASE_TILE_NUM, BG_PLTT_ID(DLG_WINDOW_PALETTE_NUM));
-    PrintTextOnHelpMessageWindow(text, 2);
-}
-
-void DestroyHelpMessageWindow_(void)
-{
-    DestroyHelpMessageWindow(2);
 }
 
 void LoadSignpostWindowFrameGfx(void)

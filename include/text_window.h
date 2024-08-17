@@ -9,6 +9,8 @@ struct TilesPal
     u16 *pal;
 };
 
+extern const u8 gHelpMessageWindow_Gfx[];
+
 void rbox_fill_rectangle(u8 windowId);
 const u16 *GetTextWindowPalette(u8 id);
 const u16 *GetOverworldTextboxPalettePtr(void);

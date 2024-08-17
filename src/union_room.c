@@ -2896,7 +2896,6 @@ static void Task_RunUnionRoom(u8 taskId)
                     break;
                 }
             }
-            DestroyHelpMessageWindow_();
         }
         break;
     case UR_STATE_REGISTER_SELECT_MON_FADE:
@@ -2979,7 +2978,6 @@ static void Task_RunUnionRoom(u8 taskId)
             case LIST_CANCEL:
             case 8: // EXIT
                 HandleCancelActivity(TRUE);
-                DestroyHelpMessageWindow_();
                 uroom->state = UR_STATE_MAIN;
                 break;
             default:

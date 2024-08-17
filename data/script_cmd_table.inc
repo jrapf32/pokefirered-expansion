@@ -122,7 +122,7 @@ gScriptCmdTable::
 	.4byte ScrCmd_hidemonpic                     @ 0x76
 	.4byte ScrCmd_showcontestpainting            @ 0x77
 	.4byte ScrCmd_braillemessage                 @ 0x78
-	.4byte ScrCmd_nop1                           @ 0x79
+	.4byte ScrCmd_nop0x79                        @ 0x79
 	.4byte ScrCmd_giveegg                        @ 0x7a
 	.4byte ScrCmd_setmonmove                     @ 0x7b
 	.4byte ScrCmd_checkpartymove                 @ 0x7c
@@ -201,8 +201,8 @@ gScriptCmdTable::
 	.4byte ScrCmd_waitmoncry                     @ 0xc5
 	.4byte ScrCmd_bufferboxname                  @ 0xc6
 	.4byte ScrCmd_textcolor                      @ 0xc7
-	.4byte ScrCmd_loadhelp                       @ 0xc8
-	.4byte ScrCmd_unloadhelp                     @ 0xc9
+	.4byte ScrCmd_nop0xc8                        @ 0xc8
+	.4byte ScrCmd_nop0xc9                        @ 0xc9
 	.4byte ScrCmd_signmsg                        @ 0xca
 	.4byte ScrCmd_normalmsg                      @ 0xcb
 	.4byte ScrCmd_comparestat                    @ 0xcc

@@ -1289,6 +1289,16 @@ bool8 ScrCmd_textcolor(struct ScriptContext * ctx)
     return FALSE;
 }
 
+bool8 ScrCmd_nop0xc8(struct ScriptContext * ctx)
+{
+    return FALSE;
+}
+
+bool8 ScrCmd_nop0xc9(struct ScriptContext * ctx)
+{
+    return FALSE;
+}
+
 bool8 ScrCmd_message(struct ScriptContext * ctx)
 {
     const u8 *msg = (const u8 *)ScriptReadWord(ctx);
@@ -1296,23 +1306,6 @@ bool8 ScrCmd_message(struct ScriptContext * ctx)
     if (msg == NULL)
         msg = (const u8 *)ctx->data[0];
     ShowFieldMessage(msg);
-    return FALSE;
-}
-
-bool8 ScrCmd_loadhelp(struct ScriptContext * ctx)
-{
-    const u8 *msg = (const u8 *)ScriptReadWord(ctx);
-
-    if (msg == NULL)
-        msg = (const u8 *)ctx->data[0];
-    DrawHelpMessageWindowWithText(msg);
-    CopyWindowToVram(GetStartMenuWindowId(), COPYWIN_MAP);
-    return FALSE;
-}
-
-bool8 ScrCmd_unloadhelp(struct ScriptContext * ctx)
-{
-    DestroyHelpMessageWindow_();
     return FALSE;
 }
 
@@ -1655,6 +1648,11 @@ bool8 ScrCmd_bufferboxname(struct ScriptContext * ctx)
     u16 boxId = VarGet(ScriptReadHalfword(ctx));
 
     StringCopy(sScriptStringVars[stringVarIndex], GetBoxNamePtr(boxId));
+    return FALSE;
+}
+
+bool8 ScrCmd_nop0x79(struct ScriptContext * ctx)
+{
     return FALSE;
 }
 
