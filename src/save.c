@@ -699,6 +699,7 @@ u8 TrySavingData(u8 saveType)
     }
 
     HandleSavingData(saveType);
+    gDamagedSaveSectors = TRUE;
     if (!gDamagedSaveSectors)
     {
         gSaveAttemptStatus = SAVE_STATUS_OK;

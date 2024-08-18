@@ -20,59 +20,47 @@ struct HelpSystemVideoState
     /*0x15*/ u8 state;
 };
 
-bool32 sIsInSaveFailedScreen;
+static const u16 sSaveFailedScreenPals[] = INCBIN_U16("graphics/interface/save_failed_screen.gbapal");
 
 static EWRAM_DATA u16 sSaveType = SAVE_NORMAL;
 static EWRAM_DATA u8 sSaveFailedScreenState = 0;
-static EWRAM_DATA struct HelpSystemVideoState sVideoState = {0};
-static EWRAM_DATA u8 (*sMapTilesBackup)[BG_CHAR_SIZE] = NULL;
+// static EWRAM_DATA struct HelpSystemVideoState sVideoState = {0};
 
+static void CB2_SaveFailedScreen(void);
 static void BlankPalettes(void);
 static void UpdateMapBufferWithText(void);
 static void ClearMapBuffer(void);
 static void PrintTextOnSaveFailedScreen(const u8 *a0);
 static bool32 TryWipeDamagedSectors(void);
-static bool32 WipeDamagedSectors(u32 damagedSectors);
+static bool32 WipeSectors(u32 damagedSectors);
 // from help_system_util.c
 static void DecompressAndRenderGlyph(u8 fontId, u16 glyph, struct Bitmap *srcBlit, struct Bitmap *destBlit, u8 *destBuffer, u8 x, u8 y, u8 width, u8 height);
 static void HelpSystemRenderText(u8 fontId, u8 * dest, const u8 * src, u8 x, u8 y, u8 width, u8 height);
-static void RestoreCallbacks(void);
-static void RestoreGPURegs(void);
-static void RestoreMapTextColors(void);
-static void RestoreMapTiles(void);
-static void SaveCallbacks(void);
-static void SaveMapGPURegs(void);
-static void SaveMapTextColors(void);
-static void SaveMapTiles(void);
-
-static const u16 sSaveFailedScreenPals[] = INCBIN_U16("graphics/interface/save_failed_screen.gbapal");
-
-void SetNotInSaveFailedScreen(void)
-{
-    sIsInSaveFailedScreen = FALSE;
-}
 
 void DoSaveFailedScreen(u8 saveType)
 {
     sSaveType = saveType;
-    sIsInSaveFailedScreen = TRUE;
+    sSaveFailedScreenState = 0;
+    SetMainCallback2(CB2_SaveFailedScreen);
 }
 
-bool32 RunSaveFailedScreen(void)
+static void VBlankCB(void)
+{
+    LoadOam();
+    ProcessSpriteCopyRequests();
+    TransferPlttBuffer();
+}
+
+static void CB2_SaveFailedScreen(void)
 {
     switch (sSaveFailedScreenState)
     {
     case 0:
-        if (!sIsInSaveFailedScreen)
-            return FALSE;
+        SetVBlankCallback(NULL);
         m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 128);
-        SaveCallbacks();
         sSaveFailedScreenState = 1;
         break;
     case 1:
-        SaveMapTiles();
-        SaveMapGPURegs();
-        SaveMapTextColors();
         BlankPalettes();
         SetGpuReg(REG_OFFSET_DISPCNT, 0);
         sSaveFailedScreenState = 2;
@@ -111,24 +99,30 @@ bool32 RunSaveFailedScreen(void)
         break;
     case 6:
         if (JOY_NEW(A_BUTTON))
+        {
+            SetGpuReg(REG_OFFSET_DISPCNT, 0);
+            BlankPalettes();
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            SetVBlankCallback(VBlankCB);
             sSaveFailedScreenState = 7;
+        }
         break;
     case 7:
-        SetGpuReg(REG_OFFSET_DISPCNT, 0);
-        RestoreMapTiles();
-        BlankPalettes();
-        sSaveFailedScreenState = 8;
-        break;
-    case 8:
-        m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 256);
-        RestoreMapTextColors();
-        RestoreGPURegs();
-        RestoreCallbacks();
-        sIsInSaveFailedScreen = FALSE;
-        sSaveFailedScreenState = 0;
+        if (!UpdatePaletteFade())
+        {
+            if (gGameContinueCallback == NULL) // no callback exists, so do a soft reset.
+            {
+                DoSoftReset();
+            }
+            else
+            {
+                SetMainCallback2((MainCallback)gGameContinueCallback);
+                gGameContinueCallback = NULL;
+            }
+            sSaveFailedScreenState = 0;
+        }
         break;
     }
-    return TRUE;
 }
 
 static void BlankPalettes(void)
@@ -189,7 +183,7 @@ static bool32 TryWipeDamagedSectors(void)
     int i = 0;
     for (i = 0; gDamagedSaveSectors != 0 && i < 3; i++)
     {
-        if (WipeDamagedSectors(gDamagedSaveSectors))
+        if (WipeSectors(gDamagedSaveSectors))
             return FALSE;
         HandleSavingData(sSaveType);
     }
@@ -198,13 +192,14 @@ static bool32 TryWipeDamagedSectors(void)
     return TRUE;
 }
 
-static bool16 VerifySectorWipe(u32 sector)
+static bool16 VerifySectorWipe(u16 sector)
 {
-    u16 sector0 = sector;
-    u16 i;
     u32 *saveDataBuffer = (void *)&gSaveDataBuffer;
-    ReadFlash(sector0, 0, saveDataBuffer, 0x1000);
-    for (i = 0; i < 0x1000 / sizeof(u32); i++, saveDataBuffer++)
+    u16 i;
+
+    ReadFlash(sector, 0, saveDataBuffer, 0x1000);
+
+    for (i = 0; i < SECTOR_SIZE / sizeof(u32); i++, saveDataBuffer++)
     {
         if (*saveDataBuffer != 0)
             return TRUE;
@@ -214,111 +209,35 @@ static bool16 VerifySectorWipe(u32 sector)
 
 static bool32 WipeSector(u32 sector)
 {
-    bool32 result;
     u16 i, j;
+    bool8 failed = TRUE;
 
-    i = 0;
-    while (i < 130)
+    // Attempt to wipe sector with an arbitrary attempt limit of 130
+    for (i = 0; failed && i < 130; i++)
     {
-        for (j = 0; j < 0x1000; j++)
-        {
+        for (j = 0; j < SECTOR_SIZE; j++)
             ProgramFlashByte(sector, j, 0);
-        }
-        result = VerifySectorWipe(sector);
-        i++;
-        if (!result)
-            break;
+
+        failed = VerifySectorWipe(sector);
     }
 
-    return result;
+    return failed;
 }
 
-static bool32 WipeDamagedSectors(u32 damagedSectors)
+static bool32 WipeSectors(u32 sectorBits)
 {
-    int i;
-    for (i = 0; i < 32; i++)
-    {
-        if (damagedSectors & (1 << i))
-        {
-            if (!WipeSector(i))
-            {
-                damagedSectors &= ~(1 << i);
-            }
-        }
-    }
-    if (damagedSectors == 0)
+    u32 i;
+
+    for (i = 0; i < SECTORS_COUNT; i++)
+        if ((sectorBits & (1 << i)) && !WipeSector(i))
+            sectorBits &= ~(1 << i);
+
+    if (sectorBits == 0)
         return FALSE;
     else
         return TRUE;
 }
 
-static void RestoreCallbacks(void)
-{
-    gMain.vblankCallback = sVideoState.savedVblankCb;
-    gMain.hblankCallback = sVideoState.savedHblankCb;
-}
-
-static void RestoreGPURegs(void)
-{
-    SetGpuReg(REG_OFFSET_BLDCNT, sVideoState.savedBldCnt);
-    SetGpuReg(REG_OFFSET_BG0HOFS, sVideoState.savedBg0Hofs);
-    SetGpuReg(REG_OFFSET_BG0VOFS, sVideoState.savedBg0Vofs);
-    SetGpuReg(REG_OFFSET_BG0CNT, sVideoState.savedBg0Cnt);
-    SetGpuReg(REG_OFFSET_DISPCNT, sVideoState.savedDispCnt);
-}
-
-static void RestoreMapTextColors(void)
-{
-    RestoreTextColors(
-        &sVideoState.savedTextColor[0],
-        &sVideoState.savedTextColor[1],
-        &sVideoState.savedTextColor[2]
-    );
-}
-
-static void RestoreMapTiles(void)
-{
-    RequestDma3Copy(sMapTilesBackup, (void *)BG_CHAR_ADDR(3), BG_CHAR_SIZE, DMA3_16BIT);
-    Free(sMapTilesBackup);
-}
-
-static void SaveCallbacks(void)
-{
-    vu16 * dma;
-    sVideoState.savedVblankCb = gMain.vblankCallback;
-    sVideoState.savedHblankCb = gMain.hblankCallback;
-    gMain.vblankCallback = NULL;
-    gMain.hblankCallback = NULL;
-
-    dma = (void *)REG_ADDR_DMA0;
-    dma[5] &= ~(DMA_START_MASK | DMA_DREQ_ON | DMA_REPEAT);
-    dma[5] &= ~DMA_ENABLE;
-    dma[5];
-}
-
-static void SaveMapGPURegs(void)
-{
-    sVideoState.savedDispCnt = GetGpuReg(REG_OFFSET_DISPCNT);
-    sVideoState.savedBg0Cnt = GetGpuReg(REG_OFFSET_BG0CNT);
-    sVideoState.savedBg0Hofs = GetGpuReg(REG_OFFSET_BG0HOFS);
-    sVideoState.savedBg0Vofs = GetGpuReg(REG_OFFSET_BG0VOFS);
-    sVideoState.savedBldCnt = GetGpuReg(REG_OFFSET_BLDCNT);
-}
-
-static void SaveMapTiles(void)
-{
-    sMapTilesBackup = Alloc(BG_CHAR_SIZE);
-    RequestDma3Copy((void *)BG_CHAR_ADDR(3), sMapTilesBackup, BG_CHAR_SIZE, DMA3_16BIT);
-}
-
-static void SaveMapTextColors(void)
-{
-    SaveTextColors(
-        &sVideoState.savedTextColor[0],
-        &sVideoState.savedTextColor[1],
-        &sVideoState.savedTextColor[2]
-    );
-}
 
 // remove this??
 static void DecompressAndRenderGlyph(u8 fontId, u16 glyph, struct Bitmap *srcBlit, struct Bitmap *destBlit, u8 *destBuffer, u8 x, u8 y, u8 width, u8 height)

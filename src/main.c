@@ -140,8 +140,6 @@ void AgbMain()
 
     gSoftResetDisabled = FALSE;
 
-    SetNotInSaveFailedScreen();
-
 #ifndef NDEBUG
 #if (LOG_HANDLER == LOG_HANDLER_MGBA_PRINT)
     (void) MgbaOpen();
