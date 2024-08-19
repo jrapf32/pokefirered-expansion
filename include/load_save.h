@@ -26,7 +26,6 @@ void LoadSerializedGame(void);
 void LoadPlayerBag(void);
 void SavePlayerBag(void);
 void SetSaveBlocksPointers(void);
-void MoveSaveBlocks_ResetHeap(void);
 void ApplyNewEncryptionKeyToAllEncryptedData(u32 encryptionKey);
 void ApplyNewEncryptionKeyToBagItems(u32 encryptionKey);
 void ApplyNewEncryptionKeyToWord(u32 * word, u32 encryptionKey);

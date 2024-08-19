@@ -1,6 +1,8 @@
 #ifndef GUARD_TRAINER_TOWER_H
 #define GUARD_TRAINER_TOWER_H
 
+extern u32 *gTrainerTowerVBlankCounter;
+
 void PrintTrainerTowerRecords(void);
 void InitTrainerTowerBattleStruct(void);
 void FreeTrainerTowerBattleStruct(void);
@@ -10,6 +12,5 @@ void GetTrainerTowerOpponentWinText(u8 *dest, u8 opponentIdx);
 void GetTrainerTowerOpponentLoseText(u8 *dest, u8 opponentIdx);
 void GetTrainerTowerOpponentName(u8 *text);
 u8 GetTrainerTowerOpponentClass(void);
-void UpdateTrainerTowerTimer(void);
 
 #endif //GUARD_TRAINER_TOWER_H

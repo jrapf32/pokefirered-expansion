@@ -646,10 +646,11 @@ static void UpdateSaveAddresses(void)
 u8 HandleSavingData(u8 saveType)
 {
     u8 i;
+    u32 *trainerTowerBackupVar = gTrainerTowerVBlankCounter;
     u8 *tempAddr;
 
+    gTrainerTowerVBlankCounter = NULL;
     UpdateSaveAddresses();
-    UpdateTrainerTowerTimer();
     switch (saveType)
     {
     case SAVE_HALL_OF_FAME_ERASE_BEFORE:
@@ -689,6 +690,7 @@ u8 HandleSavingData(u8 saveType)
         WriteSaveSectorOrSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
         break;
     }
+    gTrainerTowerVBlankCounter = trainerTowerBackupVar;
     return 0;
 }
 

@@ -16,6 +16,7 @@
 #include "save_failed_screen.h"
 #include "scanline_effect.h"
 #include "test_runner.h"
+#include "trainer_tower.h"
 
 static void VBlankIntr(void);
 static void HBlankIntr(void);
@@ -27,13 +28,10 @@ static void IntrDummy(void);
 extern void gInitialMainCB2(void);
 
 const u8 gGameVersion = GAME_VERSION;
+
 const u8 gGameLanguage = GAME_LANGUAGE;
 
-#if MODERN
-const char BuildDateTime[] = __DATE__ " " __TIME__;
-#else
 const char BuildDateTime[] = "2004 07 20 09:30";
-#endif //MODERN
 
 const IntrFunc gIntrTableTemplate[] =
 {
@@ -56,17 +54,19 @@ const IntrFunc gIntrTableTemplate[] =
 #define INTR_COUNT ((int)(sizeof(gIntrTableTemplate)/sizeof(IntrFunc)))
 
 u16 gKeyRepeatStartDelay;
-u8 gLinkTransferringData;
+bool8 gLinkTransferringData;
 struct Main gMain;
 u16 gKeyRepeatContinueDelay;
-u8 gSoftResetDisabled;
+bool8 gSoftResetDisabled;
 IntrFunc gIntrTable[INTR_COUNT];
-bool8 gLinkVSyncDisabled;
+u8 gLinkVSyncDisabled;
 u32 IntrMain_Buffer[0x200];
-u8 gPcmDmaCounter;
+s8 gPcmDmaCounter;
 void *gAgbMainLoop_sp;
 
 static EWRAM_DATA u16 sTrainerId = 0;
+
+//EWRAM_DATA void (**gFlashTimerIntrFunc)(void) = NULL;
 
 static void UpdateLinkAndCallCallbacks(void);
 static void InitMainCallbacks(void);
@@ -172,6 +172,7 @@ static void UpdateLinkAndCallCallbacks(void)
 static void InitMainCallbacks(void)
 {
     gMain.vblankCounter1 = 0;
+    gTrainerTowerVBlankCounter = NULL;
     gMain.vblankCounter2 = 0;
     gMain.callback1 = NULL;
     SetMainCallback2(gInitialMainCB2);
@@ -376,6 +377,9 @@ static void VBlankIntr(void)
 
     gMain.vblankCounter1++;
 
+    if (gTrainerTowerVBlankCounter && *gTrainerTowerVBlankCounter < 0xFFFFFFFF)
+        (*gTrainerTowerVBlankCounter)++;
+
     if (gMain.vblankCallback)
         gMain.vblankCallback();
 
@@ -435,9 +439,38 @@ static void WaitForVBlank(void)
 {
     gMain.intrCheck &= ~INTR_FLAG_VBLANK;
 
-    while (!(gMain.intrCheck & INTR_FLAG_VBLANK))
-        ;
+    if (gWirelessCommType != 0)
+    {
+        // Desynchronization may occur if wireless adapter is connected
+        // and we call VBlankIntrWait();
+        while (!(gMain.intrCheck & INTR_FLAG_VBLANK))
+            ;
+    }
+    else
+    {
+        VBlankIntrWait();
+    }
 }
+
+void SetTrainerTowerVBlankCounter(u32 *counter)
+{
+    gTrainerTowerVBlankCounter = counter;
+}
+
+void ClearTrainerTowerVBlankCounter(void)
+{
+    gTrainerTowerVBlankCounter = NULL;
+}
+
+// void SetTrainerHillVBlankCounter(u32 *counter)
+// {
+//     gTrainerHillVBlankCounter = counter;
+// }
+
+// void ClearTrainerHillVBlankCounter(void)
+// {
+//     gTrainerHillVBlankCounter = NULL;
+// }
 
 void DoSoftReset(void)
 {
@@ -448,7 +481,7 @@ void DoSoftReset(void)
     DmaStop(2);
     DmaStop(3);
     SiiRtcProtect();
-    SoftReset(RESET_ALL & ~RESET_SIO_REGS);
+    SoftReset(RESET_ALL);
 }
 
 void ClearPokemonCrySongs(void)
