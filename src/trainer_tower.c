@@ -1,22 +1,23 @@
 #include "global.h"
 #include "gflib.h"
-#include "util.h"
-#include "event_data.h"
-#include "cereader_tool.h"
-#include "easy_chat.h"
-#include "battle_setup.h"
-#include "battle_transition.h"
 #include "battle.h"
 #include "battle_main.h"
-#include "overworld.h"
+#include "battle_setup.h"
+#include "battle_transition.h"
+#include "cereader_tool.h"
+#include "easy_chat.h"
+#include "event_data.h"
 #include "item.h"
 #include "menu.h"
 #include "new_menu_helpers.h"
-#include "constants/items.h"
-#include "constants/songs.h"
-#include "constants/layouts.h"
-#include "constants/trainers.h"
+#include "overworld.h"
+#include "rtc.h"
+#include "util.h"
 #include "constants/event_objects.h"
+#include "constants/items.h"
+#include "constants/layouts.h"
+#include "constants/songs.h"
+#include "constants/trainers.h"
 #include "constants/trainer_tower.h"
 
 #define CURR_FLOOR sTrainerTowerState->data.floors[sTrainerTowerState->floorIdx]
@@ -64,6 +65,7 @@ struct TrainerEncounterMusicPairs
 
 static EWRAM_DATA struct TrainerTowerState * sTrainerTowerState = NULL;
 static EWRAM_DATA struct TrainerTowerOpponent * sTrainerTowerOpponent = NULL;
+static EWRAM_DATA u32 sVblank1Start = 0;
 
 static void SetUpTrainerTowerDataStruct(void);
 static void FreeTrainerTowerDataStruct(void);
@@ -434,6 +436,15 @@ static const u8 sKnockoutChallengeMonIdxs[MAX_TRAINER_TOWER_FLOORS][3] = {
 extern const struct EReaderTrainerTowerSetSubstruct gTrainerTowerLocalHeader;
 extern const struct TrainerTowerFloor *const gTrainerTowerFloors[][MAX_TRAINER_TOWER_FLOORS];
 
+void UpdateTrainerTowerTimer(void)
+{
+    if (VarGet(VAR_MAP_SCENE_TRAINER_TOWER) == TRUE)
+    {
+        TRAINER_TOWER.timer += gMain.vblankCounter1 - sVblank1Start;
+        sVblank1Start = gMain.vblankCounter1;
+    }
+}
+
 void CallTrainerTowerFunc(void)
 {
     SetUpTrainerTowerDataStruct();
@@ -481,7 +492,7 @@ void InitTrainerTowerBattleStruct(void)
     sTrainerTowerOpponent->battleType = CURR_FLOOR.challengeType;
     sTrainerTowerOpponent->facilityClass = CURR_FLOOR.trainers[trainerId].facilityClass;
     sTrainerTowerOpponent->textColor = CURR_FLOOR.trainers[trainerId].textColor;
-    SetVBlankCounter1Ptr(&TRAINER_TOWER.timer);
+    UpdateTrainerTowerTimer();
     FreeTrainerTowerDataStruct();
 }
 
@@ -776,7 +787,7 @@ static void StartTrainerTowerChallenge(void)
     else
         TRAINER_TOWER.validated = FALSE;
     TRAINER_TOWER.floorsCleared = 0;
-    SetVBlankCounter1Ptr(&TRAINER_TOWER.timer);
+    sVblank1Start = gMain.vblankCounter1;
     TRAINER_TOWER.timer = 0;
     TRAINER_TOWER.spokeToOwner = FALSE;
     TRAINER_TOWER.checkedFinalTime = FALSE;
@@ -784,7 +795,6 @@ static void StartTrainerTowerChallenge(void)
 
 static void GetOwnerState(void)
 {
-    DisableVBlankCounter1();
     gSpecialVar_Result = 0;
 
     if (TRAINER_TOWER.spokeToOwner)
@@ -817,6 +827,7 @@ static void GiveChallengePrize(void)
 
 static void CheckFinalTime(void)
 {
+    UpdateTrainerTowerTimer();
     if (TRAINER_TOWER.checkedFinalTime)
     {
         gSpecialVar_Result = 2;
@@ -840,8 +851,10 @@ static void TrainerTowerResumeTimer(void)
     {
         if (TRAINER_TOWER.timer >= TRAINER_TOWER_MAX_TIME)
             TRAINER_TOWER.timer = TRAINER_TOWER_MAX_TIME;
+        else if (sVblank1Start == 0)
+            sVblank1Start = gMain.vblankCounter1;
         else
-            SetVBlankCounter1Ptr(&TRAINER_TOWER.timer);
+            UpdateTrainerTowerTimer();
     }
 }
 
@@ -886,11 +899,9 @@ static void GetTrainerTowerChallengeStatus(void)
 
 static void GetCurrentTime(void)
 {
+    UpdateTrainerTowerTimer();
     if (TRAINER_TOWER.timer >= TRAINER_TOWER_MAX_TIME)
-    {
-        DisableVBlankCounter1();
         TRAINER_TOWER.timer = TRAINER_TOWER_MAX_TIME;
-    }
 
     PRINT_TOWER_TIME(TRAINER_TOWER.timer);
 }

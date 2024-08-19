@@ -4,10 +4,7 @@ gMain
 gKeyRepeatContinueDelay
 gSoftResetDisabled
 gIntrTable
-sVcountAfterSound
 gLinkVSyncDisabled
 IntrMain_Buffer
-sVcountAtIntr
-sVcountBeforeSound
 gPcmDmaCounter
 gAgbMainLoop_sp

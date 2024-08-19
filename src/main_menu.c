@@ -240,7 +240,7 @@ static void Task_SetWin0BldRegsAndCheckSaveFile(u8 taskId)
             // gTasks[taskId].func = Task_SetWin0BldRegsNoSaveFileCheck;
             gTasks[taskId].func = Task_MainMenuCheckBattery;
             break;
-        case SAVE_STATUS_INVALID:
+        case SAVE_STATUS_CORRUPT:
             SetStdFrame0OnBg(0);
             gTasks[taskId].tMenuType = MAIN_MENU_NEWGAME;
             PrintSaveErrorStatus(taskId, gText_SaveFileHasBeenDeleted);

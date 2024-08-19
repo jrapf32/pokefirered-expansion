@@ -3,7 +3,7 @@ gLastSaveCounter
 gLastKnownGoodSector
 gDamagedSaveSectors
 gSaveCounter
-gSaveDataBufferPtr
+gReadWriteSector
 gIncrementalSectorId
 gSaveUnusedVar
 gSaveFileStatus

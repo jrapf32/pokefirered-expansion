@@ -743,20 +743,6 @@ static void SetTitleScreenScene_Cry(s16 *data)
     case 2:
         if (!gPaletteFade.active)
         {
-            // These are commented out as they’ve been relocated to intro.c.
-            // This also allows RTC reset to work without file corruption.
-            // It also has the side effect of allowing you to run flags
-            // and functions as early as the intro.
-
-            // SeedRngAndSetTrainerId();
-            // SetSaveBlocksPointers();
-            // ResetMenuAndMonGlobals();
-            // Save_ResetSaveCounters();
-            // Save_LoadGameData(SAVE_NORMAL);
-            // if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_INVALID)
-            //     Sav2_ClearSetDefault();
-            // SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
-            // InitHeap(gHeap, HEAP_SIZE);
             SetMainCallback2(CB2_InitMainMenu);
             DestroyTask(FindTaskIdByFunc(Task_TitleScreenMain));
         }

@@ -19,7 +19,7 @@
 #include "link.h"
 #include "graphics.h"
 #include "strings.h"
-#include "reset_save_heap.h"
+#include "reload_save.h"
 #include "constants/battle.h"
 #include "constants/songs.h"
 
