@@ -1,9 +1,17 @@
 #include "global.h"
-#include "gflib.h"
+
+#include "gba/flash_internal.h"
+
+#include "blit.h"
+#include "dma3.h"
+#include "gpu_regs.h"
+#include "text.h"
+#include "window.h"
+
 #include "decompress.h"
 #include "event_data.h"
-#include "gba/flash_internal.h"
 #include "m4a.h"
+#include "palette.h"
 #include "save.h"
 #include "strings.h"
 
@@ -197,7 +205,7 @@ static bool16 VerifySectorWipe(u16 sector)
     u32 *saveDataBuffer = (void *)&gSaveDataBuffer;
     u16 i;
 
-    ReadFlash(sector, 0, saveDataBuffer, 0x1000);
+    ReadFlash(sector, 0, (u8 *)saveDataBuffer, SECTOR_SIZE);
 
     for (i = 0; i < SECTOR_SIZE / sizeof(u32); i++, saveDataBuffer++)
     {

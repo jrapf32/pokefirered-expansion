@@ -5525,7 +5525,7 @@ bool8 FollowablePlayerMovement_Step(struct ObjectEvent *objectEvent, struct Spri
     else if (PlayerGetCopyableMovement() == COPY_MOVE_JUMP2)
     {
         // If *player* jumps, make step take twice as long
-        ObjectEventSetSingleMovement(objectEvent, sprite, GetWalkSlowMovementAction(direction));
+        ObjectEventSetSingleMovement(objectEvent, sprite, GetWalkSlowerMovementAction(direction));
     }
     else
     {
@@ -7415,7 +7415,7 @@ static void ObjectEventSetPokeballGfx(struct ObjectEvent *objEvent)
 #define sDuration   data[3]
 #define sSpeedFlip  data[6]
 
-bool8 MovementAction_ExitPokeball_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+static bool8 MovementAction_ExitPokeball_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u32 direction = gObjectEvents[gPlayerAvatar.objectEventId].facingDirection;
     u16 graphicsId = objectEvent->graphicsId;
@@ -7488,7 +7488,7 @@ static const union AffineAnimCmd *const sAffineAnims_PokeballFollower[] =
     sAffineAnim_PokeballEnterEast,
 };
 
-bool8 MovementAction_ExitPokeball_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+static bool8 MovementAction_ExitPokeball_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     // for different speeds, anim steps occur on different frame #s
     u32 animStepFrame = (sprite->sSpeedFlip & 1) ? 7 : 3; // 0 -> 3, 1 -> 7
@@ -7524,7 +7524,7 @@ bool8 MovementAction_ExitPokeball_Step1(struct ObjectEvent *objectEvent, struct 
     return FALSE;
 }
 
-bool8 MovementAction_EnterPokeball_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+static bool8 MovementAction_EnterPokeball_Step0(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u32 direction = objectEvent->facingDirection;
     StartSpriteAnimInDirection(objectEvent, sprite, direction, GetMoveDirectionFasterAnimNum(direction));
@@ -7538,7 +7538,7 @@ bool8 MovementAction_EnterPokeball_Step0(struct ObjectEvent *objectEvent, struct
     return MovementAction_EnterPokeball_Step1(objectEvent, sprite);
 }
 
-bool8 MovementAction_EnterPokeball_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+static bool8 MovementAction_EnterPokeball_Step1(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     u16 graphicsId = objectEvent->graphicsId;
     if (--sprite->sDuration == 0)
@@ -7573,7 +7573,7 @@ bool8 MovementAction_EnterPokeball_Step1(struct ObjectEvent *objectEvent, struct
     return FALSE;
 }
 
-bool8 MovementAction_EnterPokeball_Step2(struct ObjectEvent *objectEvent, struct Sprite *sprite)
+static bool8 MovementAction_EnterPokeball_Step2(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     FollowerSetGraphics(objectEvent, OW_SPECIES(objectEvent), OW_FORM(objectEvent), objectEvent->shiny);
     objectEvent->invisible = TRUE;
@@ -10453,13 +10453,13 @@ void SetWalkSlowSpriteData(struct Sprite *sprite, u8 direction)
 
 bool8 UpdateWalkSlowAnim(struct Sprite *sprite)
 {
-    if (!(sprite->tDelay & 1))
+    if (++sprite->tDelay < 3)
     {
         Step1(sprite, sprite->tDirection);
         sprite->tStepNo++;
     }
-
-    sprite->tDelay++;
+    else
+        sprite->tDelay = 0;
 
     if (sprite->tStepNo > 15)
         return TRUE;

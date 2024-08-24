@@ -1,7 +1,6 @@
 #include "global.h"
 #include "gflib.h"
 #include "scanline_effect.h"
-#include "text_window_graphics.h"
 #include "menu.h"
 #include "task.h"
 #include "overworld.h"
@@ -338,7 +337,7 @@ static bool8 LoadOptionMenuPalette(void)
         LoadBgTiles(1, GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->tiles, 0x120, 0x1AA);
         break;
     case 1:
-        LoadPalette(GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->palette, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
+        LoadPalette(GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->pal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
         break;
     case 2:
         LoadPalette(sOptionMenuPalette, BG_PLTT_ID(1), sizeof(sOptionMenuPalette));
@@ -380,7 +379,7 @@ static void Task_OptionMenu(u8 taskId)
             break;
         case 2:
             LoadBgTiles(1, GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->tiles, 0x120, 0x1AA);
-            LoadPalette(GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->palette, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
+            LoadPalette(GetUserWindowGraphics(sOptionMenuPtr->option[MENUITEM_FRAMETYPE])->pal, BG_PLTT_ID(2), PLTT_SIZE_4BPP);
             BufferOptionMenuString(sOptionMenuPtr->cursorPos);
             break;
         case 3:

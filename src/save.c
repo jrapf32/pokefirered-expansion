@@ -11,6 +11,17 @@
 #include "task.h"
 #include "trainer_tower.h"
 
+#include "decompress.h"
+#include "fieldmap.h"
+#include "link.h"
+#include "load_save.h"
+#include "overworld.h"
+#include "pokemon_storage_system.h"
+#include "save.h"
+#include "save_failed_screen.h"
+#include "task.h"
+#include "trainer_tower.h"
+
 static u8 HandleWriteSector(u16 sectorId, const struct SaveSectorLocation *locations);
 static u8 TryWriteSector(u8 sectorNum, u8 *data);
 static u8 HandleReplaceSector(u16 sectorId, const struct SaveSectorLocation *locations);
@@ -646,7 +657,7 @@ static void UpdateSaveAddresses(void)
 u8 HandleSavingData(u8 saveType)
 {
     u8 i;
-    u32 *trainerTowerBackupVar = gTrainerTowerVBlankCounter;
+    u32 *backupPtr = gTrainerTowerVBlankCounter;
     u8 *tempAddr;
 
     gTrainerTowerVBlankCounter = NULL;
@@ -690,7 +701,7 @@ u8 HandleSavingData(u8 saveType)
         WriteSaveSectorOrSlot(FULL_SAVE_SLOT, gRamSaveSectorLocations);
         break;
     }
-    gTrainerTowerVBlankCounter = trainerTowerBackupVar;
+    gTrainerTowerVBlankCounter = backupPtr;
     return 0;
 }
 

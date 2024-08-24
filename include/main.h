@@ -37,24 +37,22 @@ struct Main
 
     /*0x439*/ u8 oamLoadDisabled:1;
     /*0x439*/ u8 inBattle:1;
-    /*0x439*/ u8 anyLinkBattlerHasFrontierPass:1;
+    /*0x439*/ u8 field_439_x4:1;
 };
 
 #define GAME_CODE_LENGTH 4
-extern const u8 gGameVersion;
-extern const u8 gGameLanguage;
 extern const char RomHeaderGameCode[GAME_CODE_LENGTH];
 extern const char RomHeaderSoftwareVersion;
+
+extern const u8 gGameVersion;
+extern const u8 gGameLanguage;
 
 extern u16 gKeyRepeatStartDelay;
 extern u8 gLinkTransferringData;
 extern struct Main gMain;
-extern u16 gKeyRepeatContinueDelay;
 extern bool8 gSoftResetDisabled;
 extern IntrFunc gIntrTable[];
 extern bool8 gLinkVSyncDisabled;
-extern u32 IntrMain_Buffer[];
-extern s8 gPcmDmaCounter;
 
 void AgbMain(void);
 void AgbMainLoop(void);
@@ -67,11 +65,11 @@ void SetSerialCallback(IntrCallback callback);
 void InitFlashTimer(void);
 // void SetTrainerHillVBlankCounter(u32 *var);
 // void ClearTrainerHillVBlankCounter(void);
-void SetTrainerTowerVBlankCounter(u32 *counter);
-void ClearTrainerTowerVBlankCounter(void);
 void DoSoftReset(void);
 void ClearPokemonCrySongs(void);
 void RestoreSerialTimer3IntrHandlers(void);
+void SetTrainerTowerVBlankCounter(u32 *ptr);
+void ClearTrainerTowerVBlankCounter(void);
 void StartTimer1(void);
 void SeedRngAndSetTrainerId(void);
 u16 GetGeneratedTrainerIdLower(void);

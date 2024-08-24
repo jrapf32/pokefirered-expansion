@@ -2114,7 +2114,7 @@ static void Task_FirstBattleEnterParty_WaitFadeNormal(u8 taskId)
 {
     if (!gPaletteFade.active)
     {
-        LoadUserWindowGfx(0, 0x4F, BG_PLTT_ID(13));
+        LoadUserWindowBorderGfx(0, 0x4F, BG_PLTT_ID(13));
         LoadStdWindowGfx(0, 0x58, BG_PLTT_ID(15));
         if (gPartyMenu.action == PARTY_ACTION_USE_ITEM)
             DisplayPartyMenuStdMessage(PARTY_MSG_USE_ON_WHICH_MON);
@@ -2232,7 +2232,7 @@ static void LoadPartyMenuWindows(void)
     DeactivateAllTextPrinters();
     for (i = 0; i < PARTY_SIZE; ++i)
         FillWindowPixelBuffer(i, PIXEL_FILL(0));
-    LoadUserWindowGfx(0, 0x4F, BG_PLTT_ID(13));
+    LoadUserWindowBorderGfx(0, 0x4F, BG_PLTT_ID(13));
     LoadStdWindowGfx(0, 0x58, BG_PLTT_ID(15));
     LoadPalette(GetTextWindowPalette(2), BG_PLTT_ID(12), PLTT_SIZE_4BPP);
     LoadPalette(GetTextWindowPalette(0), BG_PLTT_ID(14), PLTT_SIZE_4BPP);
@@ -2732,7 +2732,7 @@ static bool8 FirstBattleEnterParty_CreateWindowAndMsg1Printer(void)
 {
     u8 windowId = AddWindow(&sWindowTemplate_FirstBattleOakVoiceover);
 
-    LoadMenuMessageWindowGfx(windowId, 0x4F, BG_PLTT_ID(14));
+    LoadMessageBoxGfx(windowId, 0x4F, BG_PLTT_ID(14));
     DrawDialogFrameWithCustomTileAndPalette(windowId, 1, 0x4F, 0xE);
     PartyMenu_Oak_PrintText(windowId, gText_OakImportantToGetToKnowPokemonThroughly);
     return windowId;

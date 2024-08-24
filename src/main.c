@@ -1,8 +1,13 @@
 #include "global.h"
-#include "crt0.h"
+
 #include "gba/flash_internal.h"
-#include "gflib.h"
+
+#include "dma3.h"
+#include "gpu_regs.h"
+#include "malloc.h"
+
 #include "battle_controllers.h"
+#include "crt0.h"
 #include "intro.h"
 #include "link.h"
 #include "link_rfu.h"
@@ -15,6 +20,7 @@
 #include "rtc.h"
 #include "save_failed_screen.h"
 #include "scanline_effect.h"
+#include "sound.h"
 #include "test_runner.h"
 #include "trainer_tower.h"
 
@@ -176,9 +182,9 @@ static void InitMainCallbacks(void)
     gMain.vblankCounter2 = 0;
     gMain.callback1 = NULL;
     SetMainCallback2(gInitialMainCB2);
-    gSaveBlock2Ptr = &gSaveBlock2;
-    gSaveBlock1Ptr = &gSaveBlock1;
-    gSaveBlock2.encryptionKey = 0;
+    gSaveBlock2Ptr = &gSaveblock2.block;
+    gSaveBlock1Ptr = &gSaveblock1.block;
+    gSaveblock2.block.encryptionKey = 0;
 }
 
 static void CallCallbacks(void)
@@ -452,9 +458,9 @@ static void WaitForVBlank(void)
     }
 }
 
-void SetTrainerTowerVBlankCounter(u32 *counter)
+void SetTrainerTowerVBlankCounter(u32 *ptr)
 {
-    gTrainerTowerVBlankCounter = counter;
+    gTrainerTowerVBlankCounter = ptr;
 }
 
 void ClearTrainerTowerVBlankCounter(void)

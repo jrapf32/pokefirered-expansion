@@ -1,8 +1,12 @@
 #include "global.h"
+
+#include "gpu_regs.h"
+#include "malloc.h"
+
 #include "crt0.h"
-#include "gflib.h"
-#include "m4a.h"
 #include "load_save.h"
+#include "m4a.h"
+#include "main.h"
 #include "new_game.h"
 #include "overworld.h"
 #include "save.h"
@@ -10,7 +14,6 @@
 void ReloadSave(void)
 {
     u16 imeBackup = REG_IME;
-    
     REG_IME = 0;
     RegisterRamReset(RESET_EWRAM);
     ReInitializeEWRAM();

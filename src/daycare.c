@@ -83,10 +83,10 @@ static struct EggHatchData *sEggHatchData;
 
 // RAM buffers used to assist with BuildEggMoveset()
 EWRAM_DATA static u16 sHatchedEggLevelUpMoves[EGG_LVL_UP_MOVES_ARRAY_COUNT] = {0};
-EWRAM_DATA static u16 sHatchedEggFatherMoves[4] = {0};
-EWRAM_DATA static u16 sHatchedEggFinalMoves[4] = {0};
+EWRAM_DATA static u16 sHatchedEggFatherMoves[MAX_MON_MOVES] = {0};
+EWRAM_DATA static u16 sHatchedEggFinalMoves[MAX_MON_MOVES] = {0};
 EWRAM_DATA static u16 sHatchedEggEggMoves[EGG_MOVES_ARRAY_COUNT] = {0};
-EWRAM_DATA static u16 sHatchedEggMotherMoves[4] = {0};
+EWRAM_DATA static u16 sHatchedEggMotherMoves[MAX_MON_MOVES] = {0};
 
 static const struct WindowTemplate sDaycareLevelMenuWindowTemplate =
 {
@@ -2210,7 +2210,7 @@ static void CB2_EggHatch_1(void)
     case 9:
         if (!IsTextPrinterActive(sEggHatchData->windowId))
         {
-            LoadUserWindowGfx2(sEggHatchData->windowId, 0x140, BG_PLTT_ID(14));
+            LoadUserWindowBorderGfx_(sEggHatchData->windowId, 0x140, BG_PLTT_ID(14));
             CreateYesNoMenu(&sYesNoWinTemplate, FONT_NORMAL_COPY_2, 0, 2, 0x140, 14, 0);
             sEggHatchData->CB2_state++;
         }
