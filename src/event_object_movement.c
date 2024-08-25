@@ -7441,6 +7441,7 @@ static bool8 MovementAction_ExitPokeball_Step0(struct ObjectEvent *objectEvent, 
     ObjectEventSetPokeballGfx(objectEvent);
     objectEvent->graphicsId = graphicsId;
     objectEvent->inanimate = FALSE;
+    ApplyGlobalFieldPaletteTint(sprite->oam.paletteNum);
     return MovementAction_ExitPokeball_Step1(objectEvent, sprite);
 }
 
@@ -7569,6 +7570,7 @@ static bool8 MovementAction_EnterPokeball_Step1(struct ObjectEvent *objectEvent,
         ObjectEventSetPokeballGfx(objectEvent);
         objectEvent->graphicsId = graphicsId;
         objectEvent->inanimate = FALSE;
+        ApplyGlobalFieldPaletteTint(sprite->oam.paletteNum);
     }
     return FALSE;
 }
