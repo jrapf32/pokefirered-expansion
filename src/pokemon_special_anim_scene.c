@@ -4,7 +4,7 @@
 #include "decompress.h"
 #include "dynamic_placeholder_text_util.h"
 #include "item.h"
-#include "item_menu_icons.h"
+#include "item_icon.h"
 #include "menu.h"
 #include "new_menu_helpers.h"
 #include "pokemon_special_anim_internal.h"
@@ -910,7 +910,7 @@ void CreateItemIconSpriteAtMaxCloseness(u16 itemId)
 static struct Sprite *PSA_CreateItemIconObject(u16 itemId)
 {
     u8 spriteId;
-    spriteId = AddItemIconObject(1, 1, itemId);
+    spriteId = AddItemIconSprite(1, 1, itemId);
     if (spriteId == MAX_SPRITES)
         return NULL;
     gSprites[spriteId].oam.affineMode = ST_OAM_AFFINE_DOUBLE;

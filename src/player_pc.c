@@ -18,6 +18,7 @@
 #include "item_menu.h"
 #include "item_pc.h"
 #include "party_menu.h"
+#include "constants/item_menu.h"
 #include "constants/items.h"
 #include "constants/songs.h"
 #include "constants/field_weather.h"

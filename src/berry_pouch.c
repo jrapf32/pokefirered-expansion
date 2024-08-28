@@ -10,6 +10,7 @@
 #include "menu_helpers.h"
 #include "new_menu_helpers.h"
 #include "scanline_effect.h"
+#include "item_icon.h"
 #include "item_menu_icons.h"
 #include "list_menu.h"
 #include "graphics.h"
@@ -712,7 +713,7 @@ static void BerryPouchMoveCursorFunc(s32 itemIndex, bool8 onInit, struct ListMen
         PlaySE(SE_BAG_CURSOR);
         StartBerryPouchSpriteWobbleAnim();
     }
-    DestroyItemMenuIcon(sResources->itemMenuIconId ^ 1);
+    RemoveBagItemIconSprite(sResources->itemMenuIconId ^ 1);
     if (sResources->listMenuNumItems != itemIndex)
         CreateBerryPouchItemIcon(BagGetItemIdByPocketPosition(POCKET_BERRIES, itemIndex), sResources->itemMenuIconId);
     else

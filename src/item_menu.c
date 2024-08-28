@@ -9,6 +9,7 @@
 #include "field_player_avatar.h"
 #include "graphics.h"
 #include "item.h"
+#include "item_icon.h"
 #include "item_menu.h"
 #include "item_menu_icons.h"
 #include "item_use.h"
@@ -30,6 +31,7 @@
 #include "strings.h"
 #include "teachy_tv.h"
 #include "tm_case.h"
+#include "constants/item_menu.h"
 #include "constants/items.h"
 #include "constants/songs.h"
 
@@ -45,8 +47,8 @@ struct BagMenuAlloc
     u16 contextMenuSelectedItem;
     u8 pocketScrollArrowsTask;
     u8 pocketSwitchArrowsTask;
-    u8 nItems[3];
-    u8 maxShowed[3];
+    u8 nItems[NUM_BAG_POCKETS_NO_CASES];
+    u8 maxShowed[NUM_BAG_POCKETS_NO_CASES];
     u8 data[4];
 };
 
@@ -55,8 +57,8 @@ struct BagSlots
     struct ItemSlot bagPocket_Items[BAG_ITEMS_COUNT];
     struct ItemSlot bagPocket_KeyItems[BAG_KEYITEMS_COUNT];
     struct ItemSlot bagPocket_PokeBalls[BAG_POKEBALLS_COUNT];
-    u16 itemsAbove[3];
-    u16 cursorPos[3];
+    u16 itemsAbove[NUM_BAG_POCKETS_NO_CASES];
+    u16 cursorPos[NUM_BAG_POCKETS_NO_CASES];
     u16 registeredItem;
     u16 pocket;
 };
@@ -471,7 +473,7 @@ static bool8 LoadBagMenuGraphics(void)
         gMain.state++;
         break;
     case 15:
-        CreateBagSprite(gBagMenuState.pocket);
+        AddBagVisualSprite(gBagMenuState.pocket);
         gMain.state++;
         break;
     case 16:
@@ -480,7 +482,7 @@ static bool8 LoadBagMenuGraphics(void)
         gMain.state++;
         break;
     case 17:
-        CreateSwapLine();
+        CreateItemMenuSwapLine();
         gMain.state++;
         break;
     case 18:
@@ -677,11 +679,11 @@ static void BagListMenuMoveCursorFunc(s32 itemIndex, bool8 onInit, struct ListMe
     }
     if (sBagMenuDisplay->itemOriginalLocation == 0xFF)
     {
-        DestroyItemMenuIcon(sBagMenuDisplay->itemMenuIcon ^ 1);
+        RemoveBagItemIconSprite(sBagMenuDisplay->itemMenuIcon ^ 1);
         if (sBagMenuDisplay->nItems[gBagMenuState.pocket] != itemIndex)
-            CreateItemMenuIcon(BagGetItemIdByPocketPosition(gBagMenuState.pocket + 1, itemIndex), sBagMenuDisplay->itemMenuIcon);
+            AddBagItemIconSprite(BagGetItemIdByPocketPosition(gBagMenuState.pocket + 1, itemIndex), sBagMenuDisplay->itemMenuIcon);
         else
-            CreateItemMenuIcon(ITEMS_COUNT, sBagMenuDisplay->itemMenuIcon);
+            AddBagItemIconSprite(ITEMS_COUNT, sBagMenuDisplay->itemMenuIcon);
         sBagMenuDisplay->itemMenuIcon ^= 1;
         if (!sBagMenuDisplay->inhibitItemDescriptionPrint)
             PrintItemDescriptionOnMessageWindow(itemIndex);
@@ -826,7 +828,7 @@ void ResetBagCursorPositions(void)
     u8 i;
     gBagMenuState.pocket = POCKET_ITEMS - 1;
     gBagMenuState.bagOpen = FALSE;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
         gBagMenuState.itemsAbove[i] = 0;
         gBagMenuState.cursorPos[i] = 0;
@@ -851,7 +853,7 @@ void PocketCalculateInitialCursorPosAndItemsAbove(u8 pocketId)
 static void CalculateInitialCursorPosAndItemsAbove(void)
 {
     u8 i;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
         PocketCalculateInitialCursorPosAndItemsAbove(i);
     }
@@ -862,7 +864,7 @@ static void UpdatePocketScrollPositions(void)
     u8 i;
     u8 j;
 
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
         if (gBagMenuState.itemsAbove[i] > 3)
         {
@@ -1005,7 +1007,7 @@ void Pocket_CalculateNItemsAndMaxShowed(u8 pocketId)
 static void All_CalculateNItemsAndMaxShowed(void)
 {
     u8 i;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
         Pocket_CalculateNItemsAndMaxShowed(i);
 }
 
@@ -1146,7 +1148,7 @@ static void SwitchPockets(u8 taskId, s16 direction, bool16 a2)
         ClearWindowTilemap(2);
         DestroyListMenuTask(data[0], &gBagMenuState.cursorPos[gBagMenuState.pocket], &gBagMenuState.itemsAbove[gBagMenuState.pocket]);
         ScheduleBgCopyTilemapToVram(0);
-        DestroyItemMenuIcon(sBagMenuDisplay->itemMenuIcon ^ 1);
+        RemoveBagItemIconSprite(sBagMenuDisplay->itemMenuIcon ^ 1);
         BagDestroyPocketScrollArrowPair();
     }
     FillBgTilemapBufferRect_Palette0(1, 0x02D, 11, 1, 18, 12);
@@ -1216,8 +1218,8 @@ static void BeginMovingItemInPocket(u8 taskId, s16 itemIndex)
     StringExpandPlaceholders(gStringVar4, gOtherText_WhereShouldTheStrVar1BePlaced);
     FillWindowPixelBuffer(1, PIXEL_FILL(0));
     BagPrintTextOnWindow(1, FONT_NORMAL, gStringVar4, 0, 3, 2, 0, 0, 0);
-    UpdateSwapLinePos(0, ListMenuGetYCoordForPrintingArrowCursor(data[0]));
-    SetSwapLineInvisibility(FALSE);
+    UpdateItemMenuSwapLinePos(0, ListMenuGetYCoordForPrintingArrowCursor(data[0]));
+    SetItemMenuSwapLineInvisibility(FALSE);
     BagDestroyPocketSwitchArrowPair();
     bag_menu_print_cursor_(data[0], 2);
     gTasks[taskId].func = Task_MoveItemInPocket_HandleInput;
@@ -1233,7 +1235,7 @@ static void Task_MoveItemInPocket_HandleInput(u8 taskId)
         return;
     input = ListMenu_ProcessInput(data[0]);
     ListMenuGetScrollAndRow(data[0], &gBagMenuState.cursorPos[gBagMenuState.pocket], &gBagMenuState.itemsAbove[gBagMenuState.pocket]);
-    UpdateSwapLinePos(0, ListMenuGetYCoordForPrintingArrowCursor(data[0]));
+    UpdateItemMenuSwapLinePos(0, ListMenuGetYCoordForPrintingArrowCursor(data[0]));
     if (JOY_NEW(SELECT_BUTTON))
     {
         PlaySE(SE_SELECT);
@@ -1275,7 +1277,7 @@ static void ExecuteMoveItemInPocket(u8 taskId, u32 itemIndex)
             gBagMenuState.itemsAbove[gBagMenuState.pocket]--;
         Bag_BuildListMenuTemplate(gBagMenuState.pocket);
         data[0] = ListMenuInit(&gMultiuseListMenuTemplate, gBagMenuState.cursorPos[gBagMenuState.pocket], gBagMenuState.itemsAbove[gBagMenuState.pocket]);
-        SetSwapLineInvisibility(TRUE);
+        SetItemMenuSwapLineInvisibility(TRUE);
         CreatePocketSwitchArrowPair();
         gTasks[taskId].func = Task_BagMenu_HandleInput;
     }
@@ -1289,7 +1291,7 @@ static void AbortMovingItemInPocket(u8 taskId, u32 itemIndex)
         gBagMenuState.itemsAbove[gBagMenuState.pocket]--;
     Bag_BuildListMenuTemplate(gBagMenuState.pocket);
     data[0] = ListMenuInit(&gMultiuseListMenuTemplate, gBagMenuState.cursorPos[gBagMenuState.pocket], gBagMenuState.itemsAbove[gBagMenuState.pocket]);
-    SetSwapLineInvisibility(TRUE);
+    SetItemMenuSwapLineInvisibility(TRUE);
     CreatePocketSwitchArrowPair();
     gTasks[taskId].func = Task_BagMenu_HandleInput;
 }
@@ -2058,7 +2060,7 @@ static void BackUpPlayerBag(void)
     memcpy(sBackupPlayerBag->bagPocket_PokeBalls, gSaveBlock1Ptr->bagPocket_PokeBalls, BAG_POKEBALLS_COUNT * sizeof(struct ItemSlot));
     sBackupPlayerBag->registeredItem = gSaveBlock1Ptr->registeredItem;
     sBackupPlayerBag->pocket = gBagMenuState.pocket;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
         sBackupPlayerBag->itemsAbove[i] = gBagMenuState.itemsAbove[i];
         sBackupPlayerBag->cursorPos[i] = gBagMenuState.cursorPos[i];
@@ -2078,7 +2080,7 @@ static void RestorePlayerBag(void)
     memcpy(gSaveBlock1Ptr->bagPocket_PokeBalls, sBackupPlayerBag->bagPocket_PokeBalls, BAG_POKEBALLS_COUNT * sizeof(struct ItemSlot));
     gSaveBlock1Ptr->registeredItem = sBackupPlayerBag->registeredItem;
     gBagMenuState.pocket = sBackupPlayerBag->pocket;
-    for (i = 0; i < 3; i++)
+    for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
         gBagMenuState.itemsAbove[i] = sBackupPlayerBag->itemsAbove[i];
         gBagMenuState.cursorPos[i] = sBackupPlayerBag->cursorPos[i];

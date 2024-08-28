@@ -13,10 +13,11 @@
 #include "task.h"
 #include "item.h"
 #include "item_menu.h"
+#include "item_menu_icons.h"
 #include "overworld.h"
 #include "field_fadetransition.h"
 #include "scanline_effect.h"
-#include "item_menu_icons.h"
+#include "item_icon.h"
 #include "decompress.h"
 #include "menu_indicators.h"
 #include "field_player_avatar.h"
@@ -24,10 +25,11 @@
 #include "event_object_movement.h"
 #include "money.h"
 #include "script.h"
-#include "constants/songs.h"
-#include "constants/items.h"
-#include "constants/game_stat.h"
 #include "constants/field_weather.h"
+#include "constants/game_stat.h"
+#include "constants/item_menu.h"
+#include "constants/items.h"
+#include "constants/songs.h"
 
 #define tItemCount data[1]
 #define tItemId data[5]
@@ -567,11 +569,11 @@ static void BuyMenuPrintItemDescriptionAndShowItemIcon(s32 item, bool8 onInit, s
     FillWindowPixelBuffer(5, PIXEL_FILL(0));
     if (sShopData.martType != MART_TYPE_TMHM)
     {
-        DestroyItemMenuIcon(sShopData.itemSlot ^ 1);
+        RemoveBagItemIconSprite(sShopData.itemSlot ^ 1);
         if (item != INDEX_CANCEL)
-            CreateItemMenuIcon(item, sShopData.itemSlot);
+            AddBagItemIconSprite(item, sShopData.itemSlot);
         else
-            CreateItemMenuIcon(ITEMS_COUNT, sShopData.itemSlot);
+            AddBagItemIconSprite(ITEMS_COUNT, sShopData.itemSlot);
 
         sShopData.itemSlot ^= 1;
         BuyMenuPrint(5, FONT_NORMAL, description, 0, 3, 2, 1, 0, 0);

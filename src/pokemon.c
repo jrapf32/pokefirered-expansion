@@ -907,7 +907,7 @@ const struct SpriteTemplate gBattlerSpriteTemplates[MAX_BATTLERS_COUNT] =
         .anims = NULL, 
         .images = gBattlerPicTable_PlayerLeft,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [B_POSITION_OPPONENT_LEFT] = {
         .tileTag = TAG_NONE,
@@ -916,7 +916,7 @@ const struct SpriteTemplate gBattlerSpriteTemplates[MAX_BATTLERS_COUNT] =
         .anims = NULL, 
         .images = gBattlerPicTable_OpponentLeft,
         .affineAnims = gAffineAnims_BattleSpriteOpponentSide,
-        .callback = SpriteCB_EnemyMon,
+        .callback = SpriteCB_WildMon,
     },
     [B_POSITION_PLAYER_RIGHT] = {
         .tileTag = TAG_NONE,
@@ -925,7 +925,7 @@ const struct SpriteTemplate gBattlerSpriteTemplates[MAX_BATTLERS_COUNT] =
         .anims = NULL, 
         .images = gBattlerPicTable_PlayerRight,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [B_POSITION_OPPONENT_RIGHT] = {
         .tileTag = TAG_NONE,
@@ -934,7 +934,7 @@ const struct SpriteTemplate gBattlerSpriteTemplates[MAX_BATTLERS_COUNT] =
         .anims = NULL, 
         .images = gBattlerPicTable_OpponentRight,
         .affineAnims = gAffineAnims_BattleSpriteOpponentSide,
-        .callback = SpriteCB_EnemyMon,
+        .callback = SpriteCB_WildMon,
     },
 };
 
@@ -947,7 +947,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_Red,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_LEAF] = {
         .tileTag = TAG_NONE,
@@ -956,7 +956,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_Leaf,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_RUBY_SAPPHIRE_BRENDAN] = {
         .tileTag = TAG_NONE,
@@ -965,7 +965,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_RSBrendan,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_RUBY_SAPPHIRE_MAY] = {
         .tileTag = TAG_NONE,
@@ -974,7 +974,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_RSMay,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_POKEDUDE] = {
         .tileTag = TAG_NONE,
@@ -983,7 +983,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_Pokedude,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_OLD_MAN] = {
         .tileTag = TAG_NONE,
@@ -992,7 +992,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL, 
         .images = gTrainerBackPicTable_OldMan,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
     [TRAINER_BACK_PIC_STEVEN] = {
         .tileTag = TAG_NONE,
@@ -1001,7 +1001,7 @@ static const struct SpriteTemplate sTrainerBackSpriteTemplates[] =
         .anims = NULL,
         .images = gTrainerBackPicTable_Steven,
         .affineAnims = gAffineAnims_BattleSpritePlayerSide,
-        .callback = SpriteCB_AllyMon,
+        .callback = SpriteCB_BattleSpriteStartSlideLeft,
     },
 };
 
@@ -2067,7 +2067,7 @@ void SetMultiuseSpriteTemplateToTrainerBack(u16 trainerSpriteId, u8 battlerPosit
     if (battlerPosition == B_POSITION_PLAYER_LEFT || battlerPosition == B_POSITION_PLAYER_RIGHT)
     {
         gMultiuseSpriteTemplate = sTrainerBackSpriteTemplates[trainerSpriteId];
-        gMultiuseSpriteTemplate.anims = gTrainerBackAnimsPtrTable[trainerSpriteId];
+        gMultiuseSpriteTemplate.anims = gTrainerBacksprites[trainerSpriteId].animation;
     }
     else
     {
@@ -4844,7 +4844,7 @@ s32 GetBattlerMultiplayerId(u16 id)
 
 u8 GetTrainerEncounterMusicId(u16 trainerId)
 {
-    return TRAINER_ENCOUNTER_MUSIC(trainerId);
+    return gTrainers[SanitizeTrainerId(trainerId)].encounterMusic_gender & (F_TRAINER_FEMALE - 1);
 }
 
 u16 ModifyStatByNature(u8 nature, u16 stat, u8 statIndex)

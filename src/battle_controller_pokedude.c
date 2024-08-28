@@ -18,9 +18,10 @@
 #include "reshow_battle_screen.h"
 #include "teachy_tv.h"
 #include "constants/battle_string_ids.h"
-#include "constants/songs.h"
+#include "constants/item_menu.h"
 #include "constants/moves.h"
 #include "constants/pokemon.h"
+#include "constants/songs.h"
 
 struct PokedudeTextScriptHeader
 {
@@ -405,14 +406,14 @@ static void PokedudeHandleDrawTrainerPic(u32 battler)
         isFrontPic = FALSE;
         subpriority = 30;
         xPos = 80;
-        yPos = (8 - gTrainerBackPicCoords[trainerPicId].size) * 4 + 80;
+        yPos = (8 - gTrainerBacksprites[trainerPicId].coordinates.size) * 4 + 80;
     }
     else
     {
         trainerPicId = TRAINER_PIC_PROFESSOR_OAK;
         isFrontPic = TRUE;
         xPos = 176;
-        yPos = (8 - gTrainerFrontPicCoords[trainerPicId].size) * 4 + 40;
+        yPos = (8 - gTrainerSprites[trainerPicId].frontPicCoords.size) * 4 + 40;
     }
     BtlController_HandleDrawTrainerPic(battler, trainerPicId, isFrontPic, xPos, yPos, subpriority);
 }
@@ -550,7 +551,7 @@ static void PokedudeHandlePlaySE(u32 battler)
 
 static void PokedudeHandleIntroTrainerBallThrow(u32 battler)
 {
-    BtlController_HandleIntroTrainerBallThrow(battler, 0xD6F8, gTrainerBackPicPaletteTable[TRAINER_BACK_PIC_POKEDUDE].data, 31, Intro_TryShinyAnimShowHealthbox, StartAnimLinearTranslation);
+    BtlController_HandleIntroTrainerBallThrow(battler, 0xD6F8, gTrainerBacksprites[TRAINER_BACK_PIC_POKEDUDE].palette.data, 31, Intro_TryShinyAnimShowHealthbox, StartAnimLinearTranslation);
 }
 
 static void PokedudeHandleDrawPartyStatusSummary(u32 battler)

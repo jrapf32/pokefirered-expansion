@@ -27,8 +27,7 @@
 #include "field_weather_util.h"
 // #include "international_string_util.h"
 #include "item.h"
-// #include "item_icon.h"
-#include "item_menu_icons.h"
+#include "item_icon.h"
 #include "list_menu.h"
 #include "m4a.h"
 #include "main.h"
@@ -243,7 +242,7 @@ enum BerryFunctionsMenu
 
 // *******************************
 // Constants
-#define DEBUG_MENU_FONT FONT_NORMAL
+#define DEBUG_MENU_FONT FONT_SHORT
 
 #define DEBUG_MENU_WIDTH_MAIN 17
 #define DEBUG_MENU_HEIGHT_MAIN 9
@@ -2307,26 +2306,26 @@ static void DebugAction_Util_CheatStart(u8 taskId)
 static void DebugAction_Util_ExpansionVersion(u8 taskId)
 {
     Debug_DestroyMenu_Full(taskId);
-    // LockPlayerFieldControls();
-    // ScriptContext_SetupScript(Debug_ShowExpansionVersion);
+    LockPlayerFieldControls();
+    ScriptContext_SetupScript(Debug_ShowExpansionVersion);
 }
 
-// void BufferExpansionVersion(struct ScriptContext *ctx)
-// {
-//     static const u8 sText_Released[] = _("\nRelease Build");
-//     static const u8 sText_Unreleased[] = _("\nDevelopment Build");
-//     u8 *string = gStringVar1;
-//     *string++ = CHAR_v;
-//     string = ConvertIntToDecimalStringN(string, EXPANSION_VERSION_MAJOR, STR_CONV_MODE_LEFT_ALIGN, 3);
-//     *string++ = CHAR_PERIOD;
-//     string = ConvertIntToDecimalStringN(string, EXPANSION_VERSION_MINOR, STR_CONV_MODE_LEFT_ALIGN, 3);
-//     *string++ = CHAR_PERIOD;
-//     string = ConvertIntToDecimalStringN(string, EXPANSION_VERSION_PATCH, STR_CONV_MODE_LEFT_ALIGN, 3);
-//     if (EXPANSION_TAGGED_RELEASE)
-//         string = StringCopy(string, sText_Released);
-//     else
-//         string = StringCopy(string, sText_Unreleased);
-// }
+void BufferExpansionVersion(struct ScriptContext *ctx)
+{
+    static const u8 sText_Released[] = _("\nRelease Build");
+    static const u8 sText_Unreleased[] = _("\nDevelopment Build");
+    u8 *string = gStringVar1;
+    *string++ = CHAR_v;
+    string = ConvertIntToDecimalStringN(string, 0, STR_CONV_MODE_LEFT_ALIGN, 3);
+    *string++ = CHAR_PERIOD;
+    string = ConvertIntToDecimalStringN(string, 0, STR_CONV_MODE_LEFT_ALIGN, 3);
+    *string++ = CHAR_PERIOD;
+    string = ConvertIntToDecimalStringN(string, 0, STR_CONV_MODE_LEFT_ALIGN, 3);
+    if (FALSE)
+        string = StringCopy(string, sText_Released);
+    else
+        string = StringCopy(string, sText_Unreleased);
+}
 
 // *******************************
 // Actions Scripts
@@ -2649,8 +2648,8 @@ static void DebugAction_FlagsVars_PokedexFlags_Reset(u8 taskId)
     u16 species;
 
     // Reset Pokedex to emtpy
-    memset(&gSaveBlock2Ptr->pokedex.owned, 0, sizeof(gSaveBlock2Ptr->pokedex.owned));
-    memset(&gSaveBlock1Ptr->seen1, 0, sizeof(gSaveBlock1Ptr->seen1));
+    memset(&gSaveBlock1Ptr->dexCaught, 0, sizeof(gSaveBlock1Ptr->dexCaught));
+    memset(&gSaveBlock1Ptr->dexSeen, 0, sizeof(gSaveBlock1Ptr->dexSeen));
 
     // Add party Pokemon to Pokedex
     for (partyId = 0; partyId < PARTY_SIZE; partyId++)
@@ -2924,7 +2923,7 @@ static void DebugAction_Give_Item(u8 taskId)
     gTasks[taskId].tSubWindowId = windowId;
     gTasks[taskId].tInput = 1;
     gTasks[taskId].tDigit = 0;
-    gTasks[taskId].tSpriteId = AddItemIconObject(ITEM_TAG, ITEM_TAG, gTasks[taskId].tInput);
+    gTasks[taskId].tSpriteId = AddItemIconSprite(ITEM_TAG, ITEM_TAG, gTasks[taskId].tInput);
     gSprites[gTasks[taskId].tSpriteId].x2 = DEBUG_NUMBER_ICON_X+10;
     gSprites[gTasks[taskId].tSpriteId].y2 = DEBUG_NUMBER_ICON_Y+10;
     gSprites[gTasks[taskId].tSpriteId].oam.priority = 0;
@@ -2970,7 +2969,7 @@ static void DebugAction_Give_Item_SelectId(u8 taskId)
         FreeSpritePaletteByTag(ITEM_TAG);                           //Destroy item icon
         FreeSpriteOamMatrix(&gSprites[gTasks[taskId].tSpriteId]);   //Destroy item icon
         DestroySprite(&gSprites[gTasks[taskId].tSpriteId]);         //Destroy item icon
-        gTasks[taskId].tSpriteId = AddItemIconObject(ITEM_TAG, ITEM_TAG, gTasks[taskId].tInput);
+        gTasks[taskId].tSpriteId = AddItemIconSprite(ITEM_TAG, ITEM_TAG, gTasks[taskId].tInput);
         gSprites[gTasks[taskId].tSpriteId].x2 = DEBUG_NUMBER_ICON_X+10;
         gSprites[gTasks[taskId].tSpriteId].y2 = DEBUG_NUMBER_ICON_Y+10;
         gSprites[gTasks[taskId].tSpriteId].oam.priority = 0;

@@ -1,31 +1,22 @@
-#ifndef GUARD_ITEM_MENU_ICONS
-#define GUARD_ITEM_MENU_ICONS
-
-#include "global.h"
+#ifndef GUARD_ITEM_MENU_ICONS_H
+#define GUARD_ITEM_MENU_ICONS_H
 
 extern const struct CompressedSpriteSheet gSpriteSheet_BagMale;
 extern const struct CompressedSpriteSheet gSpriteSheet_BagFemale;
 extern const struct CompressedSpritePalette gSpritePalette_Bag;
-
 extern const struct CompressedSpriteSheet gBagSwapSpriteSheet;
 extern const struct CompressedSpritePalette gBagSwapSpritePalette;
 
-void ResetItemMenuIconState(void);
-void CreateSwapLine(void);
-void DestroyItemMenuIcon(bool8 a0);
-void CreateItemMenuIcon(u16 itemId, bool8 a0);
-void CopyItemIconPicTo4x4Buffer(const void *src, void *dest);
-u8 AddItemIconObject(u16 tilesTag, u16 paletteTag, u16 itemId);
-u8 AddItemIconObjectWithCustomObjectTemplate(const struct SpriteTemplate * origTemplate, u16 tilesTag, u16 paletteTag, u16 itemId);
-void CreateBerryPouchItemIcon(u16 itemId, u8 idx);
-void UpdateSwapLinePos(s16 x, u16 y);
-void SetSwapLineInvisibility(bool8 invisible);
-void SetBagVisualPocketId(u8);
+void AddBagVisualSprite(u8 bagPocketId);
+void SetBagVisualPocketId(u8 bagPocketId);
 void ShakeBagSprite(void);
-void CreateBagSprite(u8 animNum);
+void AddBagItemIconSprite(u16 itemId, u8 id);
+void RemoveBagItemIconSprite(u8 id);
+void CreateItemMenuSwapLine(void);
+void SetItemMenuSwapLineInvisibility(bool8 invisible);
+void UpdateItemMenuSwapLinePos(s16 x, u16 y);
 
-// item_icon.c
-const void *GetItemIconPic(u16 itemId);
-const void *GetItemIconPalette(u16 itemId);
+void ResetItemMenuIconState(void);
+void CreateBerryPouchItemIcon(u16 itemId, u8 id);
 
-#endif // GUARD_ITEM_MENU_ICONS
+#endif // GUARD_ITEM_MENU_ICONS_H

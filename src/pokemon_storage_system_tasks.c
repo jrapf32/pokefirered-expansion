@@ -20,6 +20,7 @@
 #include "text_window.h"
 #include "tilemap_util.h"
 #include "trig.h"
+#include "constants/item_menu.h"
 #include "constants/items.h"
 #include "constants/songs.h"
 
