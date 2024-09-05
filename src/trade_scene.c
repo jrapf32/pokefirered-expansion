@@ -20,7 +20,6 @@
 #include "evolution_scene.h"
 #include "overworld.h"
 #include "field_fadetransition.h"
-#include "new_menu_helpers.h"
 #include "pokedex.h"
 #include "save.h"
 #include "load_save.h"

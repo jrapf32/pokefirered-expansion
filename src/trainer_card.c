@@ -14,7 +14,6 @@
 #include "pokemon_icon.h"
 #include "graphics.h"
 #include "trainer_pokemon_sprites.h"
-#include "new_menu_helpers.h"
 #include "constants/songs.h"
 #include "constants/game_stat.h"
 #include "constants/trainers.h"
@@ -726,7 +725,7 @@ static void CB2_InitTrainerCard(void)
         gMain.state++;
         break;
     case 6:
-        LoadStdWindowFrameGfx();
+        LoadMessageBoxAndBorderGfx();
         gMain.state++;
         break;
     case 7:

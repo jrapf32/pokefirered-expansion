@@ -5,7 +5,6 @@
 #include "coins.h"
 #include "overworld.h"
 #include "menu.h"
-#include "new_menu_helpers.h"
 #include "text_window.h"
 #include "random.h"
 #include "trig.h"
@@ -2462,7 +2461,7 @@ static void SignalStopWinningLineFlashTask(void)
 
 static void Slot_CreateYesNoMenu(u8 cursorPos)
 {
-    CreateYesNoMenu(&sYesNoWindowTemplate, FONT_NORMAL, 0, 2, 10, 13, cursorPos);
+    CreateYesNoMenuAtPos(&sYesNoWindowTemplate, FONT_NORMAL, 0, 2, 10, 13, cursorPos);
     Menu_MoveCursorNoWrapAround(cursorPos);
     GetSlotMachineSetupTaskDataPtr()->yesNoMenuActive = TRUE;
 }

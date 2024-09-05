@@ -10,7 +10,6 @@
 #include "item.h"
 #include "main.h"
 #include "menu.h"
-#include "new_menu_helpers.h"
 #include "overworld.h"
 #include "rtc.h"
 #include "util.h"
@@ -905,7 +904,7 @@ static void ShowResultsBoard(void)
 
     ValidateOrResetCurTrainerTowerRecord();
     windowId = AddWindow(sTimeBoardWindowTemplate);
-    LoadStdWindowFrameGfx();
+    LoadMessageBoxAndBorderGfx();
     DrawStdWindowFrame(windowId, FALSE);
     AddTextPrinterParameterized(windowId, FONT_NORMAL, gText_TimeBoard, 74, 0, TEXT_SKIP_DRAW, NULL);
 

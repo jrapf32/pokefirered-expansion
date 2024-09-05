@@ -11,7 +11,6 @@
 #include "player_pc.h"
 #include "overworld.h"
 #include "menu_helpers.h"
-#include "new_menu_helpers.h"
 #include "graphics.h"
 #include "pokemon_icon.h"
 #include "string_util.h"

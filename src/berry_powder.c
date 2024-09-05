@@ -95,7 +95,7 @@ void DisplayBerryPowderVendorMenu(void)
 {
     struct WindowTemplate template;
 
-    template = SetWindowTemplateFields(0, 1, 1, 8, 3, 15, 32);
+    template = CreateWindowTemplate(0, 1, 1, 8, 3, 15, 32);
     sBerryPowderVendorWindowId = AddWindow(&template);
     FillWindowPixelBuffer(sBerryPowderVendorWindowId, 0);
     PutWindowTilemap(sBerryPowderVendorWindowId);

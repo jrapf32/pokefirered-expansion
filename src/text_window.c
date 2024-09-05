@@ -3,7 +3,7 @@
 #include "bg.h"
 #include "window.h"
 
-#include "new_menu_helpers.h"
+#include "graphics.h"
 #include "palette.h"
 #include "text_window.h"
 
@@ -95,7 +95,7 @@ void LoadQuestLogWindowTiles(u8 windowId, u16 destOffset)
 
 void LoadMessageBoxGfx(u8 windowId, u16 destOffset, u8 palOffset)
 {
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), gMenuMessageWindow_Gfx, 0x280, destOffset);
+    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), gMessageBox_Gfx, 0x280, destOffset);
     LoadPalette(GetTextWindowPalette(0), palOffset, PLTT_SIZE_4BPP);
 }
 

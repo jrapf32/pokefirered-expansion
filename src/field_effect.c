@@ -14,7 +14,7 @@
 #include "field_weather.h"
 #include "fieldmap.h"
 #include "metatile_behavior.h"
-#include "new_menu_helpers.h"
+#include "menu.h"
 #include "overworld.h"
 #include "party_menu.h"
 #include "pokemon_storage_system.h"
