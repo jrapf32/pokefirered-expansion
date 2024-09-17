@@ -433,7 +433,7 @@ static void FieldEffectScript_LoadFadedPal(const u8 **script)
 {
     const struct SpritePalette * spritePalette = (const struct SpritePalette * )FieldEffectScript_ReadWord(script);
     LoadSpritePalette(spritePalette);
-    UpdateSpritePaletteWithWeather(IndexOfSpritePaletteTag(spritePalette->tag));
+    UpdateSpritePaletteWithWeather(IndexOfSpritePaletteTag(spritePalette->tag), TRUE);
     *script += sizeof(u32);
 }
 
