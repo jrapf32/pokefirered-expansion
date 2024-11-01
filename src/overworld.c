@@ -1494,8 +1494,8 @@ bool8 MapHasNaturalLight(u8 mapType)
 // Update & mix day / night bg palettes (into unfaded)
 void UpdateAltBgPalettes(u16 palettes)
 {
-    const struct Tileset *primary = gMapHeader.mapLayout->primaryTileset;
-    const struct Tileset *secondary = gMapHeader.mapLayout->secondaryTileset;
+    const struct Tileset *primary = GetPrimaryTileset(gMapHeader.mapLayout);
+    const struct Tileset *secondary = GetSecondaryTileset(gMapHeader.mapLayout);
     u32 i = 1;
     if (!MapHasNaturalLight(gMapHeader.mapType))
         return;
@@ -1880,6 +1880,7 @@ static bool32 LoadMapInStepsLink(u8 *state)
     switch (*state)
     {
     case 0:
+        UpdateLoadedSeason();
         InitOverworldBgs();
         ScriptContext_Init();
         UnlockPlayerFieldControls();
@@ -1956,6 +1957,7 @@ static bool32 LoadMapInStepsLocal(u8 *state, bool32 inLink)
     switch (*state)
     {
     case 0:
+        UpdateLoadedSeason();
         InitOverworldBgs();
         FieldClearVBlankHBlankCallbacks();
         LoadMapFromWarp(inLink);
