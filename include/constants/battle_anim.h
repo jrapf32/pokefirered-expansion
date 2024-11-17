@@ -416,6 +416,7 @@
 #define ANIM_TAG_BEAM                       (ANIM_SPRITES_START + 402)
 #define ANIM_TAG_RED_EXPLOSION              (ANIM_SPRITES_START + 403)
 #define ANIM_TAG_PURPLE_CHAIN               (ANIM_SPRITES_START + 404)
+#define ANIM_TAG_PINKVIO_ORB                (ANIM_SPRITES_START + 405)
 
 // battlers
 #define ANIM_ATTACKER    0
@@ -527,6 +528,7 @@
 #define BG_STEEL_BEAM_PLAYER 79
 #define BG_CHLOROBLAST 80
 #define BG_RAINBOW 81
+#define BG_SWAMP 82
 
 // table ids for general animations (gBattleAnims_General)
 #define B_ANIM_STATS_CHANGE             0
@@ -665,8 +667,8 @@
 #define F_PAL_TARGET      (1 << 2)
 #define F_PAL_ATK_PARTNER (1 << 3)
 #define F_PAL_DEF_PARTNER (1 << 4)
-#define F_PAL_ANIM_1      (1 << 5) // Palette set for GetBattleAnimBg1Data/GetBattleAnimBgDataByPriorityRank. Only used (ineffectually?) by Aromatherapy.
-#define F_PAL_ANIM_2      (1 << 6) // Palette set for GetBattleAnimBgData/GetBattleAnimBgDataByPriorityRank. Unused.
+#define F_PAL_ANIM_1      (1 << 5) // Palette set for GetBattleAnimBg1Data/GetBgDataForTransform. Only used (ineffectually?) by Aromatherapy.
+#define F_PAL_ANIM_2      (1 << 6) // Palette set for GetBattleAnimBgData/GetBgDataForTransform. Unused.
 #define F_PAL_ATK_SIDE    (F_PAL_ATTACKER | F_PAL_ATK_PARTNER)
 #define F_PAL_DEF_SIDE    (F_PAL_TARGET | F_PAL_DEF_PARTNER)
 #define F_PAL_BATTLERS    (F_PAL_ATK_SIDE | F_PAL_DEF_SIDE)

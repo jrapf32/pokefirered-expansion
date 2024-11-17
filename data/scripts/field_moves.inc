@@ -1,11 +1,7 @@
 EventScript_CutTree::
 	lockall
-	goto_if_unset FLAG_BADGE02_GET, EventScript_CantCutTree
-	checkpartymove MOVE_CUT
-	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantCutTree
-	setfieldeffectargument 0, VAR_RESULT
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	buffermovename STR_VAR_2, MOVE_CUT
+	checkfieldmoveusable FIELD_MOVE_CUT
+	goto_if_eq VAR_RESULT, FALSE, EventScript_CantCutTree
 	msgbox Text_CutTreeDown, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_DontCutTree
 	msgbox Text_MonUsedMove
@@ -62,12 +58,8 @@ EventScript_FldEffRockSmash::
 
 EventScript_RockSmash::
 	lockall
-	goto_if_unset FLAG_BADGE06_GET, EventScript_CantSmashRock
-	checkpartymove MOVE_ROCK_SMASH
-	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSmashRock
-	setfieldeffectargument 0, VAR_RESULT
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	buffermovename STR_VAR_2, MOVE_ROCK_SMASH
+	checkfieldmoveusable FIELD_MOVE_ROCK_SMASH
+	goto_if_eq VAR_RESULT, FALSE, EventScript_CantSmashRock
 	msgbox Text_UseRockSmash, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_DontSmashRock
 	msgbox Text_MonUsedMove
@@ -226,11 +218,9 @@ Text_MonMaySmashRock::
 
 EventScript_StrengthBoulder::
 	lockall
-	goto_if_unset FLAG_BADGE04_GET, EventScript_CantMoveBoulder
 	goto_if_set FLAG_SYS_USE_STRENGTH, EventScript_AlreadyUsedStrength
-	checkpartymove MOVE_STRENGTH
-	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantMoveBoulder
-	setfieldeffectargument 0, VAR_RESULT
+	checkfieldmoveusable FIELD_MOVE_STRENGTH
+	goto_if_eq VAR_RESULT, FALSE, EventScript_CantMoveBoulder
 	msgbox Text_UseStrength, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_DontUseStrength
 	closemessage
@@ -284,10 +274,8 @@ Text_StrengthMadeMovingBouldersPossible::
 
 EventScript_Waterfall::
 	lockall
-	checkpartymove MOVE_WATERFALL
-	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_WaterCrashingDown
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
+	checkfieldmoveusable FIELD_MOVE_WATERFALL
+	goto_if_eq VAR_RESULT, FALSE, EventScript_WaterCrashingDown
 	msgbox Text_UseWaterfall, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_EndWaterfall
 	msgbox Text_MonUsedWaterfall
@@ -316,10 +304,8 @@ Text_MonUsedWaterfall::
 @ Unused leftover from R/S
 EventScript_DeepWater::
 	lockall
-	checkpartymove MOVE_DIVE
-	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_MayGoUnderwater
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
+	checkfieldmoveusable FIELD_MOVE_DIVE
+	goto_if_eq VAR_RESULT, FALSE, EventScript_MayGoUnderwater
 	setfieldeffectargument 1, 1
 	msgbox Text_SeaIsDeepUseDive, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_EndDive
@@ -337,10 +323,8 @@ EventScript_EndDive:
 
 EventScript_TrySurface::
 	lockall
-	checkpartymove MOVE_DIVE
+	checkfieldmoveusable FIELD_MOVE_DIVE
 	goto_if_eq VAR_RESULT, PARTY_SIZE, EventScript_CantSurface
-	bufferpartymonnick STR_VAR_1, VAR_RESULT
-	setfieldeffectargument 0, VAR_RESULT
 	setfieldeffectargument 1, 1
 	msgbox Text_LightFilteringUseDive, MSGBOX_YESNO
 	goto_if_eq VAR_RESULT, NO, EventScript_EndSurface

@@ -1056,7 +1056,7 @@
 	.endm
 
 	@ creates a mon for a given party and slot
-	@ otherwise 
+	@ otherwise
 	.macro createmon side:req, slot:req, species:req, level:req, item, ball, nature, abilityNum, gender, hpEv, atkEv, defEv, speedEv, spAtkEv, spDefEv, hpIv, atkIv, defIv, speedIv, spAtkIv, spDefIv, move1, move2, move3, move4, isShiny, ggMaxFactor, teraType
 	callnative ScrCmd_createmon
 	.byte \side	 @ 0 - player, 1 - opponent
@@ -1132,12 +1132,12 @@
 	.2byte \move
 	.endm
 
-	@ Checks if at least one Pokemon in the player's party knows the specified move. If so, VAR_RESULT is set to the
-	@ (zero-indexed) slot number of the first Pokemon that knows the move. If not, VAR_RESULT is set to PARTY_SIZE.
-	@ VAR_0x8004 is also set to this Pokemon's species.
-	.macro checkpartymove move:req
+	@ Checks if field move can be used. If so, VAR_RESULT is set to TRUE, gFieldEffectArguments[0] to masked
+	@ species or party index of the Pokemon, VAR_0x8004 to species, STR_VAR_1 to the Pokemon's name,
+	@ and STR_VAR_2 to the move's name.
+	.macro checkfieldmoveusable fieldMove:req
 	.byte 0x7c
-	.2byte \move
+	.2byte \fieldMove
 	.endm
 
 	@ Converts STR_VAR_1, STR_VAR_2, or STR_VAR_3 to its corresponding index into sScriptStringVars (0, 1, or 2).
@@ -2036,15 +2036,15 @@
 	@ The rest of the arguments are the stat change values to each stat.
 	@ For example, giving the first opponent +1 to atk and -2 to speed would be: settotemboost B_POSITION_OPPONENT_LEFT, 1, 0, -2
 	.macro settotemboost battler:req, atk=0,def=0,speed=0,spatk=0,spdef=0,acc=0,evas=0
-	setvar VAR_0x8000, \battler
-	setvar VAR_0x8001, \atk
-	setvar VAR_0x8002, \def
-	setvar VAR_0x8003, \speed
-	setvar VAR_0x8004, \spatk
-	setvar VAR_0x8005, \spdef
-	setvar VAR_0x8006, \acc
-	setvar VAR_0x8007, \evas
-	special SetTotemBoost
+	callnative ScriptSetTotemBoost
+	.2byte \battler
+	.2byte \atk
+	.2byte \def
+	.2byte \speed
+	.2byte \spatk
+	.2byte \spdef
+	.2byte \acc
+	.2byte \evas
 	.endm
 
 	@ useful totem boost macros

@@ -86,9 +86,12 @@ struct PairedPalettes
     const u16 *data;
 };
 
-// Exported RAM declarations
-
-// Exported ROM declarations
+struct FollowerSpriteVisualizerData
+{
+    u16 currentmonId;
+    bool8 isShiny;
+    bool8 isFemale;
+};
 
 u8 GetObjectEventIdByLocalIdAndMap(u8, u8, u8);
 bool8 TryGetObjectEventIdByLocalIdAndMap(u8, u8, u8, u8 *);
@@ -112,6 +115,7 @@ void RemoveFollowingPokemon(void);
 struct ObjectEvent *GetFollowerObject(void);
 u8 CreateVirtualObject(u16 graphicsId, u8 virtualObjId, s16 x, s16 y, u8 elevation, u8 direction);
 u8 CreateObjectGraphicsSprite(u16 graphicsId, SpriteCallback callback, s16 x, s16 y, u8 subpriority);
+u8 CreateObjectGraphicsFollowerSpriteForVisualizer(u16, void (*)(struct Sprite *), s16 x, s16 y, u8 subpriority, struct FollowerSpriteVisualizerData *data);
 u8 TrySpawnObjectEvent(u8 localId, u8 mapNum, u8 mapGroup);
 u32 SpawnSpecialObjectEventParameterized(u16 graphicsId, u8 movementBehavior, u8 localId, s16 x, s16 y, u8 elevation);
 u8 SpawnSpecialObjectEvent(struct ObjectEventTemplate *);
@@ -222,20 +226,12 @@ u8 CopySprite(struct Sprite *sprite, s16 x, s16 y, u8 subpriority);
 void FieldEffectFreeTilesIfUnused(u16 tileStart);
 
 // Exported data declarations
-
-extern const struct SpriteTemplate *const gFieldEffectObjectTemplatePointers[];
-extern const struct SpritePalette gSpritePalette_GeneralFieldEffect1;
-extern const struct SpritePalette gSpritePalette_GeneralFieldEffect1Summer;
-extern const struct SpritePalette gSpritePalette_GeneralFieldEffect1Autumn;
-extern const struct SpritePalette gSpritePalette_GeneralFieldEffect1Winter;
-extern const struct SpriteTemplate gFieldEffectObjectTemplate_TallGrassSummer;
-extern const struct SpriteTemplate gFieldEffectObjectTemplate_TallGrassAutumn;
-extern const struct SpriteTemplate gFieldEffectObjectTemplate_TallGrassWinter;
 extern const struct OamData gObjectEventBaseOam_32x32;
 extern const struct OamData gObjectEventBaseOam_64x64;
 extern const struct SubspriteTable sOamTables_32x32[];
 extern const struct SubspriteTable sOamTables_64x64[];
 extern const union AnimCmd *const sAnimTable_Following[];
+extern const union AnimCmd *const sAnimTable_Following_Asym[];
 extern const u16 gFieldEffectObjectPic_CutGrass[];
 extern const u16 gFieldEffectPal_CutGrass[];
 extern const u8 gReflectionEffectPaletteMap[];

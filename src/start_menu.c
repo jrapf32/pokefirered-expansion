@@ -219,7 +219,7 @@ static void SetUpStartMenu(void)
         SetUpStartMenu_UnionRoom();
     else if (GetSafariZoneFlag() == TRUE)
         SetUpStartMenu_SafariZone();
-    else if (DEBUG_OVERWORLD_MENU == TRUE && DEBUG_OVERWORLD_IN_MENU == TRUE)
+    else if (DEBUG_OVERWORLD_MENU && DEBUG_OVERWORLD_IN_MENU)
         SetUpStartMenu_Debug();
     else
         SetUpStartMenu_NormalField();
@@ -606,10 +606,11 @@ static bool8 StartMenuDebugCallback(void)
     DestroySafariZoneStatsWindow();
     HideStartMenuDebug(); // Hide start menu without enabling movement
 
-#if DEBUG_OVERWORLD_MENU == TRUE
-    FreezeObjectEvents();
-    Debug_ShowMainMenu();
-#endif
+    if (DEBUG_OVERWORLD_MENU == TRUE)
+    {
+        FreezeObjectEvents();
+        Debug_ShowMainMenu();
+    }
     return TRUE;
 }
 

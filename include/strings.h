@@ -185,8 +185,6 @@ extern const u8 gText_Berry[];
 extern const u8 gText_Ghost[];
 
 // pokemon
-extern const u8 gText_StatSharply[];
-extern const u8 gText_StatRose[];
 extern const u8 gText_DefendersStatRose[];
 extern const u8 gBattleText_GetPumped[];
 extern const u8 gBattleText_MistShroud[];
@@ -300,17 +298,6 @@ extern const u8 gText_Able3[];
 extern const u8 gText_NotAble2[];
 extern const u8 gText_Learned[];
 extern const u8 gText_Able2[];
-extern const u8 gText_CutATreeOrGrass[];
-extern const u8 gText_FlyToAKnownTown[];
-extern const u8 gText_TravelOnWater[];
-extern const u8 gText_MoveHeavyBoulders[];
-extern const u8 gText_LightUpDarkness[];
-extern const u8 gText_ShatterACrackedRock[];
-extern const u8 gText_ClimbAWaterfall[];
-extern const u8 gText_EscapeFromHere[];
-extern const u8 gText_LureWildPokemon[];
-extern const u8 gText_ShareHp[];
-extern const u8 gText_ReturnToAHealingSpot[];
 extern const u8 gText_Summary5[];
 extern const u8 gText_Switch2[];
 extern const u8 gText_Item[];
