@@ -144,8 +144,11 @@ static const u32 (*const sFieldEffectFuncs[FLDEFF_COUNT]) (void) =
     [FLDEFF_TRACKS_BUG]                   = FldEff_TracksBug,
     [FLDEFF_TRACKS_SPOT]                  = FldEff_TracksSpot,
     [FLDEFF_SNOW_FOOTPRINTS]              = FldEff_SnowFootprints,
+    [FLDEFF_SNOW_BIKE_TIRE_TRACKS]        = FldEff_SnowBikeTireTracks,
+    [FLDEFF_SNOW_TRACKS_SLITHER]          = FldEff_SnowTracksSlither,
+    [FLDEFF_SNOW_TRACKS_BUG]              = FldEff_SnowTracksBug,
+    [FLDEFF_SNOW_TRACKS_SPOT]             = FldEff_SnowTracksSpot,
 };
-
 static const struct OamData sNewGameOakOamAttributes = {
     .y = 0,
     .affineMode = ST_OAM_AFFINE_OFF,

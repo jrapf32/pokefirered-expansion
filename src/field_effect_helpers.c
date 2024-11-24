@@ -782,6 +782,25 @@ u32 FldEff_TracksBug(void)
     return 0;
 }
 
+u32 FldEff_SnowTracksBug(void)
+{
+    u8 spriteId;
+    struct Sprite *sprite;
+
+    FieldEffectScript_LoadFadedPal(&gSpritePalette_GeneralFieldEffect2);
+    SetSpritePosToOffsetMapCoords((s16 *)&gFieldEffectArguments[0], (s16 *)&gFieldEffectArguments[1], 8, 8);
+    spriteId = CreateSpriteAtEnd(&gFieldEffectObjectTemplate_SnowBugTracks, gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
+    if (spriteId != MAX_SPRITES)
+    {
+        sprite = &gSprites[spriteId];
+        sprite->coordOffsetEnabled = TRUE;
+        sprite->oam.priority = gFieldEffectArguments[3];
+        sprite->data[7] = FLDEFF_SNOW_TRACKS_BUG;
+        StartSpriteAnim(sprite, gFieldEffectArguments[4]);
+    }
+    return 0;
+}
+
 u32 FldEff_TracksSpot(void)
 {
     u8 spriteId;
@@ -796,6 +815,25 @@ u32 FldEff_TracksSpot(void)
         sprite->coordOffsetEnabled = TRUE;
         sprite->oam.priority = gFieldEffectArguments[3];
         sprite->data[7] = FLDEFF_TRACKS_SPOT;
+        StartSpriteAnim(sprite, gFieldEffectArguments[4]);
+    }
+    return 0;
+}
+
+u32 FldEff_SnowTracksSpot(void)
+{
+    u8 spriteId;
+    struct Sprite *sprite;
+
+    FieldEffectScript_LoadFadedPal(&gSpritePalette_GeneralFieldEffect2);
+    SetSpritePosToOffsetMapCoords((s16 *)&gFieldEffectArguments[0], (s16 *)&gFieldEffectArguments[1], 8, 8);
+    spriteId = CreateSpriteAtEnd(&gFieldEffectObjectTemplate_SnowSpotTracks, gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
+    if (spriteId != MAX_SPRITES)
+    {
+        sprite = &gSprites[spriteId];
+        sprite->coordOffsetEnabled = TRUE;
+        sprite->oam.priority = gFieldEffectArguments[3];
+        sprite->data[7] = FLDEFF_SNOW_TRACKS_SPOT;
         StartSpriteAnim(sprite, gFieldEffectArguments[4]);
     }
     return 0;
@@ -820,6 +858,25 @@ u32 FldEff_BikeTireTracks(void)
     return spriteId;
 }
 
+u32 FldEff_SnowBikeTireTracks(void)
+{
+    u8 spriteId;
+    struct Sprite *sprite;
+
+    FieldEffectScript_LoadFadedPal(&gSpritePalette_GeneralFieldEffect2);
+    SetSpritePosToOffsetMapCoords((s16 *)&gFieldEffectArguments[0], (s16 *)&gFieldEffectArguments[1], 8, 8);
+    spriteId = CreateSpriteAtEnd(&gFieldEffectObjectTemplate_SnowBikeTireTracks, gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
+    if (spriteId != MAX_SPRITES)
+    {
+        sprite = &gSprites[spriteId];
+        sprite->coordOffsetEnabled = TRUE;
+        sprite->oam.priority = gFieldEffectArguments[3];
+        sprite->data[7] = FLDEFF_SNOW_BIKE_TIRE_TRACKS;
+        StartSpriteAnim(sprite, gFieldEffectArguments[4]);
+    }
+    return spriteId;
+}
+
 u32 FldEff_TracksSlither(void)
 {
     u8 spriteId;
@@ -834,6 +891,25 @@ u32 FldEff_TracksSlither(void)
         sprite->coordOffsetEnabled = TRUE;
         sprite->oam.priority = gFieldEffectArguments[3];
         sprite->data[7] = FLDEFF_TRACKS_SLITHER;
+        StartSpriteAnim(sprite, gFieldEffectArguments[4]);
+    }
+    return spriteId;
+}
+
+u32 FldEff_SnowTracksSlither(void)
+{
+    u8 spriteId;
+    struct Sprite *sprite;
+
+    FieldEffectScript_LoadFadedPal(&gSpritePalette_GeneralFieldEffect2);
+    SetSpritePosToOffsetMapCoords((s16 *)&gFieldEffectArguments[0], (s16 *)&gFieldEffectArguments[1], 8, 8);
+    spriteId = CreateSpriteAtEnd(&gFieldEffectObjectTemplate_SnowSlitherTracks, gFieldEffectArguments[0], gFieldEffectArguments[1], gFieldEffectArguments[2]);
+    if (spriteId != MAX_SPRITES)
+    {
+        sprite = &gSprites[spriteId];
+        sprite->coordOffsetEnabled = TRUE;
+        sprite->oam.priority = gFieldEffectArguments[3];
+        sprite->data[7] = FLDEFF_SNOW_TRACKS_SLITHER;
         StartSpriteAnim(sprite, gFieldEffectArguments[4]);
     }
     return spriteId;
