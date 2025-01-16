@@ -341,6 +341,21 @@ void PlayCry_ReleaseDouble(u16 species, s8 pan, u8 mode)
     }
 }
 
+// Duck the BGM but don't restore it. Not present in R/S
+void PlayCry_DuckNoRestore(u16 species, s8 pan, u8 mode)
+{
+    if (mode == CRY_MODE_DOUBLES)
+    {
+        PlayCryInternal(species, pan, CRY_VOLUME, CRY_PRIORITY_NORMAL, mode);
+    }
+    else
+    {
+        m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 85);
+        PlayCryInternal(species, pan, CRY_VOLUME, CRY_PRIORITY_NORMAL, mode);
+        gPokemonCryBGMDuckingCounter = 2;
+    }
+}
+
 void PlayCry_Script(u16 species, u8 mode)
 {
     m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, 85);
@@ -359,7 +374,7 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     
     // Set default values
     // May be overridden depending on mode.
-    length = 140;
+    length = 210;
     reverse = FALSE;
     release = 0;
     pitch = 15360;
@@ -443,10 +458,6 @@ void PlayCryInternal(u16 species, s8 pan, s8 volume, u8 priority, u8 mode)
     SetPokemonCryChorus(chorus);
     SetPokemonCryPriority(priority);
 
-    // This is a fancy way to get a cry of a pokemon.
-    // It creates 4 sets of 128 mini cry tables.
-    // If you wish to expand pokemon, you need to
-    // append new cases to the switch.
     species = GetCryIdBySpecies(species);
     if (species != CRY_NONE)
     {

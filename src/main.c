@@ -6,6 +6,7 @@
 #include "gpu_regs.h"
 #include "malloc.h"
 
+#include "agb_flash.h"
 #include "battle_controllers.h"
 #include "crt0.h"
 #include "intro.h"
@@ -59,20 +60,17 @@ const IntrFunc gIntrTableTemplate[] =
 
 #define INTR_COUNT ((int)(sizeof(gIntrTableTemplate)/sizeof(IntrFunc)))
 
-u16 gKeyRepeatStartDelay;
-bool8 gLinkTransferringData;
-struct Main gMain;
-u16 gKeyRepeatContinueDelay;
-bool8 gSoftResetDisabled;
-IntrFunc gIntrTable[INTR_COUNT];
-u8 gLinkVSyncDisabled;
-u32 IntrMain_Buffer[0x200];
-s8 gPcmDmaCounter;
-void *gAgbMainLoop_sp;
+COMMON_DATA u16 gKeyRepeatStartDelay = 0;
+COMMON_DATA bool8 gLinkTransferringData = 0;
+COMMON_DATA struct Main gMain = {0};
+COMMON_DATA u16 gKeyRepeatContinueDelay = 0;
+COMMON_DATA bool8 gSoftResetDisabled = 0;
+COMMON_DATA IntrFunc gIntrTable[INTR_COUNT] = {0};
+COMMON_DATA u8 gLinkVSyncDisabled = 0;
+COMMON_DATA s8 gPcmDmaCounter = 0;
+COMMON_DATA void *gAgbMainLoop_sp = NULL;
 
 static EWRAM_DATA u16 sTrainerId = 0;
-
-//EWRAM_DATA void (**gFlashTimerIntrFunc)(void) = NULL;
 
 static void UpdateLinkAndCallCallbacks(void);
 static void InitMainCallbacks(void);
@@ -318,9 +316,7 @@ void InitIntrHandlers(void)
     for (i = 0; i < INTR_COUNT; i++)
         gIntrTable[i] = gIntrTableTemplate[i];
 
-    DmaCopy32(3, IntrMain, IntrMain_Buffer, sizeof(IntrMain_Buffer));
-
-    INTR_VECTOR = IntrMain_Buffer;
+    INTR_VECTOR = IntrMain;
 
     SetVBlankCallback(NULL);
     SetHBlankCallback(NULL);

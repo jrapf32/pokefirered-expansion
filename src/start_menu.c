@@ -736,6 +736,7 @@ static u8 RunSaveDialogCB(void)
 
 void Field_AskSaveTheGame(void)
 {
+    sTimeWindowId = WINDOW_NONE;
     StartMenu_PrepareForSave();
     CreateTask(task50_save_game, 80);
 }

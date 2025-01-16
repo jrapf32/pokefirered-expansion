@@ -11,6 +11,7 @@
 #include "task.h"
 #include "trainer_tower.h"
 
+#include "agb_flash.h"
 #include "decompress.h"
 #include "fieldmap.h"
 #include "link.h"

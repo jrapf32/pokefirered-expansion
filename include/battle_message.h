@@ -71,6 +71,7 @@
 #define B_TXT_DEF_NAME 0x39
 #define B_TXT_DEF_TEAM1 0x3A // Your/The opposing
 #define B_TXT_DEF_TEAM2 0x3B // your/the opposing
+#define B_TXT_DEF_PARTNER_NAME 0x3C
 #define B_TXT_ATK_NAME_WITH_PREFIX2 0x3E //lowercase
 #define B_TXT_DEF_NAME_WITH_PREFIX2 0x3F //lowercase
 #define B_TXT_EFF_NAME_WITH_PREFIX2 0x40 //lowercase
@@ -255,7 +256,7 @@ enum
     TRAINER_SLIDE_DYNAMAX,
 };
 
-void BufferStringBattle(u32 battler, u16 stringID);
+void BufferStringBattle(u16 stringID, u32 battler);
 u32 BattleStringExpandPlaceholdersToDisplayedString(const u8 *src);
 u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst, u32 dstSize);
 void BattleHandleAddTextPrinter(const u8 *text, u8 arg1);
@@ -297,9 +298,9 @@ extern const u8 gText_BattleTowerBan_Is2[];
 
 extern const u8 gText_StatSharply[];
 extern const u8 gText_StatRose[];
-extern const u8 sText_StatFell[];
-extern const u8 sText_drastically[];
-extern const u8 sText_severely[];
+extern const u8 gText_StatFell[];
+extern const u8 gText_drastically[];
+extern const u8 gText_severely[];
 
 // battle_script_commands
 extern const u8 gText_BattleYesNoChoice[];

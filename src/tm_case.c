@@ -14,6 +14,7 @@
 #include "money.h"
 #include "shop.h"
 #include "teachy_tv.h"
+#include "move.h"
 #include "pokemon_storage_system.h"
 #include "party_menu.h"
 #include "data.h"
@@ -1463,7 +1464,7 @@ static void Task_Pokedude_Run(u8 taskId)
             sTMCaseStaticResources.scrollOffset = sPokedudeBagBackup->scrollOffset;
             Free(sPokedudeBagBackup);
             CpuFastCopy(gPlttBufferFaded, gPlttBufferUnfaded, PLTT_SIZE);
-            CB2_SetUpReshowBattleScreenAfterMenu();
+            SetBagOpenFalse();
             BeginNormalPaletteFade(PALETTES_ALL, -2, 0, 16, 0);
             tPokedudeState++;
         }

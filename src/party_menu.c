@@ -6498,7 +6498,7 @@ static u8 GetPartyLayoutFromBattleType(void)
     return PARTY_LAYOUT_DOUBLE;
 }
 
-void OpenPartyMenuInTutorialBattle(u8 partyAction)
+void OpenPartyMenuInBattle(u8 partyAction)
 {
     if (!BtlCtrl_OakOldMan_TestState2Flag(FIRST_BATTLE_MSG_FLAG_PARTY_MENU) && (gBattleTypeFlags & BATTLE_TYPE_FIRST_BATTLE))
     {
@@ -6508,7 +6508,7 @@ void OpenPartyMenuInTutorialBattle(u8 partyAction)
                       FALSE,
                       PARTY_MSG_NONE,
                       Task_FirstBattleEnterParty_WaitFadeIn,
-                      SetCB2ToReshowScreenAfterMenu);
+                      CB2_SetUpReshowBattleScreenAfterMenu);
         BtlCtrl_OakOldMan_SetState2Flag(FIRST_BATTLE_MSG_FLAG_PARTY_MENU);
     }
     else
@@ -6519,7 +6519,7 @@ void OpenPartyMenuInTutorialBattle(u8 partyAction)
                       FALSE,
                       PARTY_MSG_CHOOSE_MON,
                       Task_HandleChooseMonInput,
-                      SetCB2ToReshowScreenAfterMenu);
+                      CB2_SetUpReshowBattleScreenAfterMenu);
     }
     ReshowBattleScreenDummy();
     UpdatePartyToBattleOrder();
@@ -6527,7 +6527,7 @@ void OpenPartyMenuInTutorialBattle(u8 partyAction)
 
 void Pokedude_OpenPartyMenuInBattle(void)
 {
-    InitPartyMenu(PARTY_MENU_TYPE_IN_BATTLE, GetPartyLayoutFromBattleType(), PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_PartyMenu_Pokedude, SetCB2ToReshowScreenAfterMenu);
+    InitPartyMenu(PARTY_MENU_TYPE_IN_BATTLE, GetPartyLayoutFromBattleType(), PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_PartyMenu_Pokedude, CB2_SetUpReshowBattleScreenAfterMenu);
     ReshowBattleScreenDummy();
     UpdatePartyToBattleOrder();
 }
@@ -6884,8 +6884,8 @@ static void UpdatePartyToFieldOrder(void)
 
 static void CB2_SetUpExitToBattleScreen(void)
 {
-    CB2_SetUpReshowBattleScreenAfterMenu();
-    SetMainCallback2(SetCB2ToReshowScreenAfterMenu);
+    SetBagOpenFalse();
+    SetMainCallback2(CB2_SetUpReshowBattleScreenAfterMenu);
 }
 
 void ShowPartyMenuToShowcaseMultiBattleParty(void)
