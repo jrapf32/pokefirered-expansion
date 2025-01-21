@@ -7,13 +7,12 @@
 #include "task.h"
 #include "trig.h"
 
-extern const u8 gBattleAnimRegOffsBgCnt[];
-extern const u8 gBattleIntroRegOffsBgCnt[];
-
 static void BattleIntroSlide1(u8 taskId);
 static void BattleIntroSlide2(u8 taskId);
 static void BattleIntroSlide3(u8 taskId);
 static void BattleIntroSlideLink(u8 taskId);
+
+static const u8 sBattleAnimBgCnts[] = {REG_OFFSET_BG0CNT, REG_OFFSET_BG1CNT, REG_OFFSET_BG2CNT, REG_OFFSET_BG3CNT};
 
 static const TaskFunc sBattleIntroSlideFuncs[] =
 {
@@ -33,7 +32,7 @@ void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
 {
     if (bgId < 4)
     {
-        u32 sBgCnt = GetGpuReg(gBattleAnimRegOffsBgCnt[bgId]);
+        u32 sBgCnt = GetGpuReg(sBattleAnimBgCnts[bgId]);
         switch (attributeId)
         {
         case BG_ANIM_SCREEN_SIZE:
@@ -58,7 +57,7 @@ void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value)
             ((struct BgCnt *)&sBgCnt)->screenBaseBlock = value;
             break;
         }
-        SetGpuReg(gBattleAnimRegOffsBgCnt[bgId], sBgCnt);
+        SetGpuReg(sBattleAnimBgCnts[bgId], sBgCnt);
     }
 }
 
@@ -68,7 +67,7 @@ s32 GetAnimBgAttribute(u8 bgId, u8 attributeId)
 
     if (bgId < 4)
     {
-        bgCnt = GetGpuReg(gBattleIntroRegOffsBgCnt[bgId]);
+        bgCnt = GetGpuReg(sBattleAnimBgCnts[bgId]);
         switch (attributeId)
         {
         case BG_ANIM_SCREEN_SIZE:
@@ -467,17 +466,21 @@ static void BattleIntroSlideLink(u8 taskId)
     }
 }
 
-void CopyBattlerSpriteToBg(s32 bgId, u8 x, u8 y, u8 battlerPosition, u8 palno, u8 *tilesDest, u16 *tilemapDest, u16 tilesOffset)
+void DrawBattlerOnBg(int bgId, u8 x, u8 y, u8 battlerPosition, u8 paletteId, u8 *tiles, u16 *tilemap, u16 tilesOffset)
 {
-    s32 i, j;
-    s32 offset = tilesOffset;
-
-    CpuCopy16(gMonSpritesGfxPtr->sprites[battlerPosition], tilesDest, BG_SCREEN_SIZE);
-    LoadBgTiles(bgId, tilesDest, 0x1000, tilesOffset);
-    for (i = y; i < y + 8; ++i)
-        for (j = x; j < x + 8; ++j)
-            tilemapDest[i * 32 + j] = offset++ | (palno << 12);
-    LoadBgTilemap(bgId, tilemapDest, BG_SCREEN_SIZE, 0);
+    int i, j;
+    int offset = tilesOffset;
+    CpuCopy16(gMonSpritesGfxPtr->spritesGfx[battlerPosition], tiles, BG_SCREEN_SIZE);
+    LoadBgTiles(bgId, tiles, 0x1000, tilesOffset);
+    for (i = y; i < y + 8; i++)
+    {
+        for (j = x; j < x + 8; j++)
+        {
+            tilemap[i * 32 + j] = offset | (paletteId << 12);
+            offset++;
+        }
+    }
+    LoadBgTilemap(bgId, tilemap, BG_SCREEN_SIZE, 0);
 }
 
 // Unused
@@ -485,7 +488,7 @@ static void UNUSED DrawBattlerOnBgDMA(u8 arg0, u8 arg1, u8 battlerPosition, u8 a
 {
     s32 i, j, offset;
 
-    DmaCopy16(3, gMonSpritesGfxPtr->sprites[battlerPosition] + BG_SCREEN_SIZE * arg3, (void *)BG_SCREEN_ADDR(0) + arg5, BG_SCREEN_SIZE);
+    DmaCopy16(3, gMonSpritesGfxPtr->spritesGfx[battlerPosition] + BG_SCREEN_SIZE * arg3, (void *)BG_SCREEN_ADDR(0) + arg5, BG_SCREEN_SIZE);
     offset = (arg5 >> 5) - (arg7 << 9);
     for (i = arg1; i < arg1 + 8; ++i)
         for (j = arg0; j < arg0 + 8; ++j)
