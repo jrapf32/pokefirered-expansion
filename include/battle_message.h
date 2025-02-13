@@ -3,11 +3,14 @@
 
 #include "constants/battle.h"
 
+// This buffer can hold many different things. Some of the things it can hold
+// that have explicit sizes are listed below to ensure it can contain them.
 #define TEXT_BUFF_ARRAY_COUNT   max(16, \
                                 max(MOVE_NAME_LENGTH + 2, /* +2 to hold the "!" and EOS. */ \
                                 max(POKEMON_NAME_LENGTH + 1, \
                                     ABILITY_NAME_LENGTH + 1)))
 #define BATTLE_MSG_MAX_WIDTH    208
+#define BATTLE_MSG_MAX_LINES    2
 
 // for 0xFD
 
@@ -76,6 +79,10 @@
 #define B_TXT_DEF_NAME_WITH_PREFIX2 0x3F //lowercase
 #define B_TXT_EFF_NAME_WITH_PREFIX2 0x40 //lowercase
 #define B_TXT_SCR_ACTIVE_NAME_WITH_PREFIX2 0x41 //lowercase
+#define B_TXT_TRAINER1_NAME_WITH_CLASS 0x42
+#define B_TXT_TRAINER2_NAME_WITH_CLASS 0x43
+#define B_TXT_PARTNER_NAME_WITH_CLASS 0x44
+#define B_TXT_ATK_TRAINER_NAME_WITH_CLASS 0x45
 
 // for B_TXT_BUFF1, B_TXT_BUFF2 and B_TXT_BUFF3
 
@@ -240,22 +247,6 @@ struct BattleMsgData
     u8 textBuffs[3][TEXT_BUFF_ARRAY_COUNT];
 };
 
-enum
-{
-    TRAINER_SLIDE_LAST_SWITCHIN,
-    TRAINER_SLIDE_LAST_LOW_HP,
-    TRAINER_SLIDE_FIRST_DOWN,
-    TRAINER_SLIDE_LAST_HALF_HP,
-    TRAINER_SLIDE_FIRST_CRITICAL_HIT,
-    TRAINER_SLIDE_FIRST_SUPER_EFFECTIVE_HIT,
-    TRAINER_SLIDE_FIRST_STAB_MOVE,
-    TRAINER_SLIDE_PLAYER_MON_UNAFFECTED,
-    TRAINER_SLIDE_MEGA_EVOLUTION,
-    TRAINER_SLIDE_Z_MOVE,
-    TRAINER_SLIDE_BEFORE_FIRST_TURN,
-    TRAINER_SLIDE_DYNAMAX,
-};
-
 void BufferStringBattle(u16 stringID, u32 battler);
 u32 BattleStringExpandPlaceholdersToDisplayedString(const u8 *src);
 u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst, u32 dstSize);
@@ -264,15 +255,9 @@ void SetPpNumbersPaletteInMoveSelection(u32 battler);
 u8 GetCurrentPpToMaxPpState(u8 currentPp, u8 maxPp);
 void BattlePutTextOnWindow(const u8 *text, u8 windowId_flags);
 bool8 BattleStringShouldBeColored(u16);
-u32 ShouldDoTrainerSlide(u32 battler, u32 which); // return 1 for TrainerA, 2 forTrainerB
 void ExpandBattleTextBuffPlaceholders(const u8 *src, u8 *dst);
 
 extern struct BattleMsgData *gBattleMsgDataPtr;
-
-extern u8 gDisplayedStringBattle[478];
-extern u8 gBattleTextBuff1[TEXT_BUFF_ARRAY_COUNT];
-extern u8 gBattleTextBuff2[TEXT_BUFF_ARRAY_COUNT];
-extern u8 gBattleTextBuff3[TEXT_BUFF_ARRAY_COUNT + 13];
 
 extern const u8 *const gBattleStringsTable[];
 extern const u8 *const gStatNamesTable[];

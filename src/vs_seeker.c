@@ -922,7 +922,7 @@ void ClearRematchStateByTrainerId(void)
 {
     u8 objEventId = 0;
     struct ObjectEventTemplate *objectEventTemplates = gSaveBlock1Ptr->objectEventTemplates;
-    int vsSeekerDataIdx = LookupVsSeekerOpponentInArray(sRematches, gTrainerBattleOpponent_A);
+    int vsSeekerDataIdx = LookupVsSeekerOpponentInArray(sRematches, TRAINER_BATTLE_PARAM.opponentA);
 
     if (vsSeekerDataIdx != -1)
     {
@@ -992,11 +992,11 @@ static u8 GetRematchTrainerIdGivenGameState(const u16 *trainerIdxs, u8 rematchId
 
 bool8 ShouldTryRematchBattle(void)
 {
-    if (ShouldTryRematchBattleInternal(sRematches, gTrainerBattleOpponent_A))
+    if (ShouldTryRematchBattleInternal(sRematches, TRAINER_BATTLE_PARAM.opponentA))
     {
         return TRUE;
     }
-    return HasRematchTrainerAlreadyBeenFought(sRematches, gTrainerBattleOpponent_A);
+    return HasRematchTrainerAlreadyBeenFought(sRematches, TRAINER_BATTLE_PARAM.opponentA);
 }
 
 static bool8 ShouldTryRematchBattleInternal(const struct RematchData *vsSeekerData, u16 trainerBattleOpponent)
@@ -1065,7 +1065,7 @@ int GetRematchTrainerId(u16 trainerId)
 
 u8 IsTrainerReadyForRematch(void)
 {
-    return IsTrainerReadyForRematchInternal(sRematches, gTrainerBattleOpponent_A);
+    return IsTrainerReadyForRematchInternal(sRematches, TRAINER_BATTLE_PARAM.opponentA);
 }
 
 static bool8 IsTrainerReadyForRematchInternal(const struct RematchData * array, u16 trainerId)

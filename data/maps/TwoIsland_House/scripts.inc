@@ -46,7 +46,7 @@ TwoIsland_House_EventScript_AskTutorMon::
 
 TwoIsland_House_EventScript_ChooseMonToTutor::
 	msgbox TwoIsland_House_Text_TutorWhichMon
-	special SelectMoveTutorMon
+	special ChooseMonForMoveRelearner
 	waitstate
 	goto_if_ge VAR_0x8004, PARTY_SIZE, TwoIsland_House_EventScript_EndTutorMove
 	special IsSelectedMonEgg
@@ -57,7 +57,7 @@ TwoIsland_House_EventScript_ChooseMonToTutor::
 
 TwoIsland_House_EventScript_ChooseMoveToTeach::
 	msgbox TwoIsland_House_Text_TeachWhichMove
-	special DisplayMoveTutorMenu
+	special TeachMoveRelearnerMove
 	waitstate
 	goto_if_eq VAR_0x8004, 0, TwoIsland_House_EventScript_ChooseMonToTutor
 	goto_if_set HAS_BOTH_MUSHROOMS, TwoIsland_House_EventScript_ChooseMushroom

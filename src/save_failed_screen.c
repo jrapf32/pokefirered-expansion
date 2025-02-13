@@ -15,20 +15,7 @@
 #include "save.h"
 #include "strings.h"
 
-struct HelpSystemVideoState
-{
-    /*0x00*/ MainCallback savedVblankCb;
-    /*0x04*/ MainCallback savedHblankCb;
-    /*0x08*/ u16 savedDispCnt;
-    /*0x0a*/ u16 savedBg0Cnt;
-    /*0x0c*/ u16 savedBg0Hofs;
-    /*0x0e*/ u16 savedBg0Vofs;
-    /*0x10*/ u16 savedBldCnt;
-    /*0x12*/ u8 savedTextColor[3];
-    /*0x15*/ u8 state;
-};
-
-static const u16 sSaveFailedScreenPals[] = INCBIN_U16("graphics/interface/save_failed_screen.gbapal");
+COMMON_DATA bool32 sIsInSaveFailedScreen = 0;
 
 static EWRAM_DATA u16 sSaveType = SAVE_NORMAL;
 static EWRAM_DATA u8 sSaveFailedScreenState = 0;

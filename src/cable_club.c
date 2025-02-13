@@ -28,7 +28,7 @@
 #include "constants/field_weather.h"
 #include "constants/maps.h"
 
-u32 UnusedVarNeededToMatch[8];
+COMMON_DATA u32 UnusedVarNeededToMatch[8] = {0};
 
 static void Task_LinkupStart(u8 taskId);
 static void Task_LinkupAwaitConnection(u8 taskId);
@@ -661,7 +661,7 @@ static void Task_StartWiredCableClubBattle(u8 taskId)
             break;
         }
         CleanupOverworldWindowsAndTilemaps();
-        gTrainerBattleOpponent_A = TRAINER_LINK_OPPONENT;
+        TRAINER_BATTLE_PARAM.opponentA = TRAINER_LINK_OPPONENT;
         SetMainCallback2(CB2_InitBattle);
         gMain.savedCallback = CB2_ReturnFromCableClubBattle;
         DestroyTask(taskId);
@@ -734,7 +734,7 @@ static void Task_StartWirelessCableClubBattle(u8 taskId)
             break;
         }
         CleanupOverworldWindowsAndTilemaps();
-        gTrainerBattleOpponent_A = TRAINER_LINK_OPPONENT;
+        TRAINER_BATTLE_PARAM.opponentA = TRAINER_LINK_OPPONENT;
         SetMainCallback2(CB2_InitBattle);
         gMain.savedCallback = CB2_ReturnFromCableClubBattle;
         DestroyTask(taskId);

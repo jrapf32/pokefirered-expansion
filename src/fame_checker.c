@@ -56,8 +56,8 @@ static EWRAM_DATA struct FameCheckerData * sFameCheckerData = NULL;
 static EWRAM_DATA struct ListMenuItem * sListMenuItems = NULL;
 static EWRAM_DATA s32 sLastMenuIdx = 0;
 
-struct ListMenuTemplate gFameChecker_ListMenuTemplate;
-u8 gIconDescriptionBoxIsOpen;
+COMMON_DATA struct ListMenuTemplate gFameChecker_ListMenuTemplate = {0};
+COMMON_DATA u8 gIconDescriptionBoxIsOpen = 0;
 
 static void MainCB2_LoadFameChecker(void);
 static void LoadUISpriteSheetsAndPalettes(void);
@@ -1554,7 +1554,7 @@ static u8 FC_PopulateListMenu(void)
         {
             if (sTrainerIdxs[fameCheckerIdx] < FC_NONTRAINER_START)
             {
-                sListMenuItems[nitems].label = gTrainers[sTrainerIdxs[fameCheckerIdx]].trainerName;
+                sListMenuItems[nitems].label = GetTrainerClassNameFromId(sTrainerIdxs[fameCheckerIdx]);
                 sListMenuItems[nitems].index = nitems;
             }
             else

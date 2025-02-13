@@ -1026,7 +1026,7 @@ static void UpdatePokedexForReceivedMon(u8 partyIdx)
     {
         u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
         u32 personality = GetMonData(mon, MON_DATA_PERSONALITY, NULL);
-        species = SpeciesToNationalDexNum(species);
+        species = SpeciesToNationalPokedexNum(species);
         GetSetPokedexFlag(species, FLAG_SET_SEEN);
         HandleSetPokedexFlag(species, FLAG_SET_CAUGHT, personality);
     }
@@ -1218,7 +1218,7 @@ static void LoadTradeGbaSpriteGfx(void)
 
 static void TradeBufferOTnameAndNicknames(void)
 {
-    u8 nickname[20];
+    u8 nickname[POKEMON_NAME_BUFFER_SIZE];
     u8 mpId;
     const struct InGameTrade * inGameTrade;
     if (sTradeAnim->isLinkTrade)
@@ -1706,7 +1706,7 @@ static bool8 DoTradeAnim_Cable(void)
         gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].x2 = 0;
         gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].y2 = 0;
         StartSpriteAnim(&gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]], 0);
-        CreatePokeballSpriteToReleaseMon(sTradeAnim->monSpriteIds[TRADE_PARTNER], gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].oam.paletteNum, 120, 84, 2, 1, 20, 0xFFFFF);
+        CreatePokeballSpriteToReleaseMon(sTradeAnim->monSpriteIds[TRADE_PARTNER], gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].oam.paletteNum, 120, 84, 2, 1, 20, 0xFFFFF, sTradeAnim->monSpecies[TRADE_PARTNER]);
         FreeSpriteOamMatrix(&gSprites[sTradeAnim->bouncingPokeballSpriteId]);
         DestroySprite(&gSprites[sTradeAnim->bouncingPokeballSpriteId]);
         sTradeAnim->state++;
@@ -2205,7 +2205,7 @@ static bool8 DoTradeAnim_Wireless(void)
         gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].x2 = 0;
         gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].y2 = 0;
         StartSpriteAnim(&gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]], 0);
-        CreatePokeballSpriteToReleaseMon(sTradeAnim->monSpriteIds[TRADE_PARTNER], gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].oam.paletteNum, 120, 84, 2, 1, 20, 0xFFFFF);
+        CreatePokeballSpriteToReleaseMon(sTradeAnim->monSpriteIds[TRADE_PARTNER], gSprites[sTradeAnim->monSpriteIds[TRADE_PARTNER]].oam.paletteNum, 120, 84, 2, 1, 20, 0xFFFFF, sTradeAnim->monSpecies[TRADE_PARTNER]);
         FreeSpriteOamMatrix(&gSprites[sTradeAnim->bouncingPokeballSpriteId]);
         DestroySprite(&gSprites[sTradeAnim->bouncingPokeballSpriteId]);
         sTradeAnim->state++;
@@ -2431,9 +2431,7 @@ u16 GetInGameTradeSpeciesInfo(void)
 
 static void BufferInGameTradeMonName(void)
 {
-    // Populates gStringVar1 with the nickname of the sent Pokemon and
-    // gStringVar2 with the name of the offered species.
-    u8 nickname[30];
+    u8 nickname[max(32, POKEMON_NAME_BUFFER_SIZE)];
     const struct InGameTrade * inGameTrade = &sInGameTrades[gSpecialVar_0x8004];
     GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, nickname);
     StringCopy_Nickname(gStringVar1, nickname);

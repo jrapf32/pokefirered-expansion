@@ -14,7 +14,7 @@
 
 @ pokefirered leftovers
 BattleScript_OldMan_Pokedude_CaughtMessage::
-	printstring STRINGID_GOTCHAPKMNCAUGHT2
+	printstring STRINGID_GOTCHAPKMNCAUGHTOLDMAN
 	setbyte gBattleOutcome, B_OUTCOME_CAUGHT
 	endlinkbattle
 	finishturn
@@ -118,7 +118,7 @@ BattleScript_ItemRestoreHP_Party::
 	return
 
 BattleScript_ItemRestoreHP_SendOutRevivedBattler:
-	switchinanim BS_SCRIPTING, FALSE
+	switchinanim BS_SCRIPTING, FALSE, FALSE
 	waitstate
 	switchineffects BS_SCRIPTING
 	end

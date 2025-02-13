@@ -113,10 +113,6 @@ static void (*const sPokedudeBufferCommands[CONTROLLER_CMDS_COUNT])(u32 battler)
     [CONTROLLER_CHOSENMONRETURNVALUE]     = BtlController_Empty,
     [CONTROLLER_ONERETURNVALUE]           = BtlController_Empty,
     [CONTROLLER_ONERETURNVALUE_DUPLICATE] = BtlController_Empty,
-    [CONTROLLER_CLEARUNKVAR]              = BtlController_Empty,
-    [CONTROLLER_SETUNKVAR]                = BtlController_Empty,
-    [CONTROLLER_CLEARUNKFLAG]             = BtlController_Empty,
-    [CONTROLLER_TOGGLEUNKFLAG]            = BtlController_Empty,
     [CONTROLLER_HITANIMATION]             = BtlController_HandleHitAnimation,
     [CONTROLLER_CANTSWITCH]               = BtlController_Empty,
     [CONTROLLER_PLAYSE]                   = PokedudeHandlePlaySE,
@@ -1043,7 +1039,7 @@ static const struct PokedudeBattlePartyInfo *const sPokedudeBattlePartyPointers[
     [TTVSCR_CATCHING] = sParties_Catching,
 };
 
-struct PokedudeBattlerState *gPokedudeBattlerStates[MAX_BATTLERS_COUNT];
+COMMON_DATA struct PokedudeBattlerState *gPokedudeBattlerStates[MAX_BATTLERS_COUNT] = {0};
 
 static void PokedudeSimulateInputChooseAction(u32 battler)
 {

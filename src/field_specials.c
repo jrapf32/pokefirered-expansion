@@ -56,8 +56,8 @@ static EWRAM_DATA u16 sListMenuLastScrollPosition = 0;
 static EWRAM_DATA u8 sPCBoxToSendMon = 0;
 static EWRAM_DATA u8 sBrailleTextCursorSpriteID = 0;
 
-struct ListMenuTemplate sFieldSpecialsListMenuTemplate;
-u16 sFieldSpecialsListMenuScrollBuffer;
+COMMON_DATA struct ListMenuTemplate sFieldSpecialsListMenuTemplate = {0};
+COMMON_DATA u16 sFieldSpecialsListMenuScrollBuffer = 0;
 
 static void Task_AnimatePcTurnOn(u8 taskId);
 static void PcTurnOnUpdateMetatileId(bool16 flag);
@@ -741,10 +741,10 @@ static u16 SampleResortGorgeousMon(void)
     for (i = 0; i < 100; i++)
     {
         species = (Random() % (NUM_SPECIES - 1)) + 1;
-        if (GetSetPokedexFlag(SpeciesToNationalDexNum(species), 0) == TRUE)
+        if (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), 0) == TRUE)
             return species;
     }
-    while (GetSetPokedexFlag(SpeciesToNationalDexNum(species), 0) != TRUE)
+    while (GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), 0) != TRUE)
     {
         if (species == SPECIES_BULBASAUR)
             species = NUM_SPECIES - 1;
@@ -1575,7 +1575,7 @@ u16 GetStarterSpecies(void)
 
 void SetSeenMon(void)
 {
-    GetSetPokedexFlag(SpeciesToNationalDexNum(gSpecialVar_0x8004), 2);
+    GetSetPokedexFlag(SpeciesToNationalPokedexNum(gSpecialVar_0x8004), 2);
 }
 
 void ResetContextNpcTextColor(void)

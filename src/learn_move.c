@@ -135,9 +135,9 @@ struct LearnMoveGfxResources
     u8 unk_1C;
     u8 unk_1D;
     u8 unk_1E;
-    struct ListMenuItem listMenuItems[25];
-    u16 learnableMoves[25];
-    u8 listMenuStrbufs[25][13];
+    struct ListMenuItem listMenuItems[MAX_RELEARNER_MOVES + 1];
+    u16 learnableMoves[MAX_RELEARNER_MOVES];
+    u8 listMenuStrbufs[MAX_RELEARNER_MOVES][13];
     bool8 scheduleMoveInfoUpdate;
     u8 selectedPartyMember;
     u8 selectedMoveSlot;
@@ -364,7 +364,7 @@ static void VBlankCB_MoveRelearner(void)
     TransferPlttBuffer();
 }
 
-void DisplayMoveTutorMenu(void)
+void TeachMoveRelearnerMove(void)
 {
     LockPlayerFieldControls();
     CreateTask(Task_InitMoveRelearnerMenu, 10);
@@ -750,7 +750,7 @@ static void MoveRelearnerInitListMenuBuffersEtc(void)
 {
     int i;
     s32 count;
-    u8 nickname[11];
+    u8 nickname[POKEMON_NAME_LENGTH + 1];
 
     sMoveRelearner->numLearnableMoves = GetMoveRelearnerMoves(&gPlayerParty[sMoveRelearner->selectedPartyMember], sMoveRelearner->learnableMoves);
     count = GetMoveRelearnerMoves(&gPlayerParty[sMoveRelearner->selectedPartyMember], sMoveRelearner->learnableMoves);

@@ -8,7 +8,10 @@
 
 #define SPECIAL_FLAGS_SIZE (NUM_SPECIAL_FLAGS / 8)  // 8 flags per byte
 #define TEMP_FLAGS_SIZE    (NUM_TEMP_FLAGS / 8)
+#define DAILY_FLAGS_SIZE    (NUM_DAILY_FLAGS / 8)
 #define TEMP_VARS_SIZE     (NUM_TEMP_VARS * 2)      // 1/2 var per byte
+
+#define NUM_DAILY_FLAGS   (DAILY_FLAGS_END - DAILY_FLAGS_START + 1)
 
 EWRAM_DATA u16 gSpecialVar_0x8000 = 0;
 EWRAM_DATA u16 gSpecialVar_0x8001 = 0;
@@ -32,10 +35,19 @@ EWRAM_DATA u16 gSpecialVar_PrevTextColor = 0;
 EWRAM_DATA u16 gSpecialVar_0x8014 = 0;
 EWRAM_DATA u8 sSpecialFlags[SPECIAL_FLAGS_SIZE] = {};
 
-#define NUM_DAILY_FLAGS   (DAILY_FLAGS_END - DAILY_FLAGS_START + 1)
-#define DAILY_FLAGS_SIZE    (NUM_DAILY_FLAGS / 8)
-
 extern u16 *const gSpecialVars[];
+
+const u16 gBadgeFlags[NUM_BADGES] =
+{
+    FLAG_BADGE01_GET,
+    FLAG_BADGE02_GET,
+    FLAG_BADGE03_GET,
+    FLAG_BADGE04_GET,
+    FLAG_BADGE05_GET,
+    FLAG_BADGE06_GET,
+    FLAG_BADGE07_GET,
+    FLAG_BADGE08_GET,
+};
 
 void InitEventData(void)
 {
