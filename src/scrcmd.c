@@ -1628,12 +1628,12 @@ bool8 ScrCmd_message(struct ScriptContext * ctx)
     return FALSE;
 }
 
-bool8 ScrCmd_nop0xc8(struct ScriptContext * ctx)
+bool8 ScrCmd_loadhelp(struct ScriptContext * ctx)
 {
     return FALSE;
 }
 
-bool8 ScrCmd_nop0xc9(struct ScriptContext * ctx)
+bool8 ScrCmd_unloadhelp(struct ScriptContext * ctx)
 {
     return FALSE;
 }

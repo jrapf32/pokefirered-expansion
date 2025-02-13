@@ -32,6 +32,8 @@ static bool32 WipeSectors(u32 damagedSectors);
 static void DecompressAndRenderGlyph(u8 fontId, u16 glyph, struct Bitmap *srcBlit, struct Bitmap *destBlit, u8 *destBuffer, u8 x, u8 y, u8 width, u8 height);
 static void HelpSystemRenderText(u8 fontId, u8 * dest, const u8 * src, u8 x, u8 y, u8 width, u8 height);
 
+static const u16 sSaveFailedScreenPals[] = INCBIN_U16("graphics/interface/save_failed_screen.gbapal");
+
 void DoSaveFailedScreen(u8 saveType)
 {
     sSaveType = saveType;
