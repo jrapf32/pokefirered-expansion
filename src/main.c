@@ -1,29 +1,31 @@
 #include "global.h"
-
-#include "gba/flash_internal.h"
-
-#include "dma3.h"
-#include "gpu_regs.h"
-#include "malloc.h"
-
-#include "agb_flash.h"
-#include "battle_controllers.h"
 #include "crt0.h"
-#include "intro.h"
+#include "malloc.h"
 #include "link.h"
 #include "link_rfu.h"
-#include "load_save.h"
+#include "librfu.h"
 #include "m4a.h"
-#include "menu.h"
+#include "bg.h"
+#include "rtc.h"
+#include "scanline_effect.h"
 #include "overworld.h"
 #include "play_time.h"
 #include "random.h"
-#include "rtc.h"
 #include "save_failed_screen.h"
-#include "scanline_effect.h"
+#include "dma3.h"
+#include "gba/flash_internal.h"
+#include "load_save.h"
+#include "gpu_regs.h"
+#include "agb_flash.h"
 #include "sound.h"
-#include "test_runner.h"
+#include "battle.h"
+#include "battle_controllers.h"
+#include "text.h"
+#include "intro.h"
+#include "main.h"
 #include "trainer_tower.h"
+#include "test_runner.h"
+#include "constants/rgb.h"
 
 static void VBlankIntr(void);
 static void HBlankIntr(void);
@@ -33,10 +35,11 @@ static void IntrDummy(void);
 
 // Defined in the linker script so that the test build can override it.
 extern void gInitialMainCB2(void);
+extern void CB2_FlashNotDetectedScreen(void);
 
 const u8 gGameVersion = GAME_VERSION;
 
-const u8 gGameLanguage = GAME_LANGUAGE;
+const u8 gGameLanguage = GAME_LANGUAGE; // English
 
 const char BuildDateTime[] = "2004 07 20 09:30";
 
@@ -87,9 +90,11 @@ void EnableVCountIntrAtLine150(void);
 
 void AgbMain()
 {
-    *(vu16 *)BG_PLTT = RGB_WHITE;
+    *(vu16 *)BG_PLTT = RGB_WHITE; // Set the backdrop to white on startup
     InitGpuRegManager();
-    REG_WAITCNT = WAITCNT_PREFETCH_ENABLE | WAITCNT_WS0_S_1 | WAITCNT_WS0_N_3;
+    REG_WAITCNT = WAITCNT_PREFETCH_ENABLE
+	        | WAITCNT_WS0_S_1 | WAITCNT_WS0_N_3
+	        | WAITCNT_WS1_S_1 | WAITCNT_WS1_N_3;
     InitKeys();
     InitIntrHandlers();
     m4aSoundInit();
@@ -181,7 +186,7 @@ static void InitMainCallbacks(void)
     gMain.callback1 = NULL;
     SetMainCallback2(gInitialMainCB2);
     gSaveBlock2Ptr = &gSaveblock2.block;
-    gSaveBlock1Ptr = &gSaveblock1.block;
+    gPokemonStoragePtr = &gPokemonStorage.block;
 }
 
 static void CallCallbacks(void)
@@ -201,6 +206,7 @@ void SetMainCallback2(MainCallback callback)
 
 void StartTimer1(void)
 {
+
     REG_TM2CNT_L = 0;
     REG_TM2CNT_H = TIMER_ENABLE | TIMER_COUNTUP;
     REG_TM1CNT_H = TIMER_ENABLE;
@@ -234,22 +240,16 @@ void EnableVCountIntrAtLine150(void)
 #ifdef BUGFIX
 static void SeedRngWithRtc(void)
 {
-    #if HQ_RANDOM == FALSE
-        u32 seed = RtcGetMinuteCount();
-        seed = (seed >> 16) ^ (seed & 0xFFFF);
-        SeedRng(seed);
-    #else
-        #define BCD8(x) ((((x) >> 4) & 0xF) * 10 + ((x) & 0xF))
-        u32 seconds;
-        struct SiiRtcInfo rtc;
-        RtcGetInfo(&rtc);
-        seconds =
-            ((HOURS_PER_DAY * RtcGetDayCount(&rtc) + BCD8(rtc.hour))
-            * MINUTES_PER_HOUR + BCD8(rtc.minute))
-            * SECONDS_PER_MINUTE + BCD8(rtc.second);
-        SeedRng(seconds);
-        #undef BCD8
-    #endif
+    #define BCD8(x) ((((x) >> 4) & 0xF) * 10 + ((x) & 0xF))
+    u32 seconds;
+    struct SiiRtcInfo rtc;
+    RtcGetInfo(&rtc);
+    seconds =
+        ((HOURS_PER_DAY * RtcGetDayCount(&rtc) + BCD8(rtc.hour))
+        * MINUTES_PER_HOUR + BCD8(rtc.minute))
+        * SECONDS_PER_MINUTE + BCD8(rtc.second);
+    SeedRng(seconds);
+    #undef BCD8
 }
 #endif
 
@@ -403,6 +403,9 @@ static void HBlankIntr(void)
 
 static void VCountIntr(void)
 {
+    if (gMain.vcountCallback)
+        gMain.vcountCallback();
+
     m4aSoundVSync();
     INTR_CHECK |= INTR_FLAG_VCOUNT;
     gMain.intrCheck |= INTR_FLAG_VCOUNT;
