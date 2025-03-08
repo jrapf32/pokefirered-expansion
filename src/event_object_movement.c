@@ -2135,10 +2135,6 @@ static void FollowerSetGraphics(struct ObjectEvent *objEvent, u32 species, bool3
         sprite->inUse = TRUE;
         sprite->oam.paletteNum = LoadDynamicFollowerPalette(species, shiny, female);
     }
-    else if (gWeatherPtr->currWeather != WEATHER_FOG_HORIZONTAL) // don't want to weather blend in fog
-    {
-        UpdateSpritePaletteWithWeather(gSprites[objEvent->spriteId].oam.paletteNum, FALSE);
-    }
 }
 
 // Like FollowerSetGraphics, but does not recenter sprite on a metatile
@@ -2836,7 +2832,6 @@ static u8 UpdateSpritePalette(const struct SpritePalette *spritePalette, struct 
     {
         sprite->oam.paletteNum = LoadSpritePalette(spritePalette);
     }
-    sprite->oam.paletteNum = LoadSpritePalette(spritePalette);
 
     return sprite->oam.paletteNum;
 }

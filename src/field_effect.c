@@ -422,8 +422,10 @@ static void UNUSED FieldEffectScript_LoadTiles(const struct SpriteSheet * sprite
 
 void FieldEffectScript_LoadFadedPal(const struct SpritePalette * spritePalette)
 {
-    LoadSpritePalette(spritePalette);
-    UpdateSpritePaletteWithWeather(IndexOfSpritePaletteTag(spritePalette->tag), TRUE);
+    u32 paletteSlot = LoadSpritePalette(spritePalette);
+
+    SetPaletteColorMapType(paletteSlot + 16, COLOR_MAP_DARK_CONTRAST);
+    UpdateSpritePaletteWithWeather(paletteSlot, TRUE);
 }
 
 void FieldEffectScript_LoadPal(const struct SpritePalette * spritePalette)

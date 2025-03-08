@@ -21,6 +21,8 @@
 #include "fieldmap.h"
 #include "fldeff.h"
 #include "heal_location.h"
+#include "item.h"
+#include "item_icon.h"
 #include "link.h"
 #include "link_rfu.h"
 #include "load_save.h"
@@ -98,6 +100,7 @@ static EWRAM_DATA struct InitialPlayerAvatarState sInitialPlayerAvatarState = {}
 EWRAM_DATA bool8 gDisableMapMusicChangeOnMapLoad = MUSIC_DISABLE_OFF;
 static EWRAM_DATA u16 sAmbientCrySpecies = SPECIES_NONE;
 static EWRAM_DATA bool8 sIsAmbientCryWaterMon = FALSE;
+EWRAM_DATA static u8 sHoursOverride = 0; // used to override apparent time of day hours
 
 ALIGNED(4) EWRAM_DATA bool8 gExitStairsMovementDisabled = FALSE;
 static EWRAM_DATA const struct CreditsOverworldCmd *sCreditsOverworld_Script = NULL;
@@ -121,7 +124,7 @@ static bool8 sReceivingFromLink;
 static u8 sRfuKeepAliveTimer;
 
 u8 gTimeOfDay;
-struct TimeBlendSettings currentTimeBlend;
+struct TimeBlendSettings gTimeBlend;
 u16 gTimeUpdateCounter; // playTimeVBlanks will eventually overflow, so this is used to update TOD
 
 static u8 CountBadgesForOverworldWhiteOutLossCalculation(void);
@@ -805,6 +808,8 @@ static void LoadMapFromWarp(bool32 unused)
 
     TrySetMapSaveWarpStatus();
     ClearTempFieldEventData();
+    // reset hours override on every warp
+    sHoursOverride = 0; 
     ResetCyclingRoadChallengeData();
     RestartWildEncounterImmunitySteps();
     MapResetTrainerRematches(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum);
@@ -963,7 +968,7 @@ void SetFlashLevel(s32 flashLevel)
     gSaveBlock1Ptr->flashLevel = flashLevel;
 }
 
-u8 Overworld_GetFlashLevel(void)
+u8 GetFlashLevel(void)
 {
     return gSaveBlock1Ptr->flashLevel;
 }
@@ -1409,77 +1414,72 @@ void CB1_Overworld(void)
 
 const struct BlendSettings gTimeOfDayBlend[] =
 {
-    [TIME_OF_DAY_NIGHT] = {.coeff = 10, .blendColor = TINT_NIGHT, .isTint = TRUE},
-    [TIME_OF_DAY_TWILIGHT] = {.coeff = 4, .blendColor = 0xA8B0E0, .isTint = TRUE},
-    [TIME_OF_DAY_DAY] = {.coeff = 0, .blendColor = 0},
+    [TIME_MORNING] = {.coeff = 4,  .blendColor = 0xA8B0E0,   .isTint = TRUE},
+    [TIME_DAY]     = {.coeff = 0,  .blendColor = 0,          .isTint = FALSE},
+    [TIME_EVENING] = {.coeff = 4,  .blendColor = 0xA8B0E0,   .isTint = TRUE},
+    [TIME_NIGHT]   = {.coeff = 10, .blendColor = TINT_NIGHT, .isTint = TRUE},
 };
 
-#define MORNING_START_MINUTES (MORNING_HOUR_BEGIN * MINUTES_PER_HOUR)
-#define MORNING_MID_POINT (MORNING_HOUR_BEGIN * MINUTES_PER_HOUR + (MORNING_HOUR_END * MINUTES_PER_HOUR - MORNING_HOUR_BEGIN * MINUTES_PER_HOUR) / 2)
-#define MORNING_END_MINUTES (MORNING_HOUR_END * MINUTES_PER_HOUR)
-#define EVENING_START_MINUTES (EVENING_HOUR_BEGIN * MINUTES_PER_HOUR)
-#define EVENING_MID_POINT (EVENING_HOUR_BEGIN * MINUTES_PER_HOUR + (EVENING_HOUR_END * MINUTES_PER_HOUR - EVENING_HOUR_BEGIN * MINUTES_PER_HOUR) / 2)
-#define EVENING_END_MINUTES (EVENING_HOUR_END * MINUTES_PER_HOUR)
+#define DEFAULT_WEIGHT 256
+#define TIME_BLEND_WEIGHT(begin, end) (DEFAULT_WEIGHT - (DEFAULT_WEIGHT * ((hours - begin) * MINUTES_PER_HOUR + minutes) / ((end - begin) * MINUTES_PER_HOUR)))
 
-u8 UpdateTimeOfDay(void)
+#define MORNING_HOUR_MIDDLE (MORNING_HOUR_BEGIN + ((MORNING_HOUR_END - MORNING_HOUR_BEGIN) / 2))
+
+void UpdateTimeOfDay(void)
 {
     s32 hours, minutes;
-    s32 minutesOfDay;
     RtcCalcLocalTime();
-    hours = gLocalTime.hours;
-    minutes = gLocalTime.minutes;
-    minutesOfDay = hours * MINUTES_PER_HOUR + minutes;
-    if (minutesOfDay < MORNING_START_MINUTES) // night
+    hours = sHoursOverride ? sHoursOverride : gLocalTime.hours;
+    minutes = sHoursOverride ? 0 : gLocalTime.minutes;
+
+    if (IsBetweenHours(hours, MORNING_HOUR_BEGIN, MORNING_HOUR_MIDDLE)) // night->morning
     {
-        currentTimeBlend.weight = 256;
-        currentTimeBlend.altWeight = 0;
-        gTimeOfDay = currentTimeBlend.time0 = currentTimeBlend.time1 = TIME_OF_DAY_NIGHT;
+        gTimeBlend.startBlend = gTimeOfDayBlend[TIME_NIGHT];
+        gTimeBlend.endBlend = gTimeOfDayBlend[TIME_MORNING];
+        gTimeBlend.weight = TIME_BLEND_WEIGHT(MORNING_HOUR_BEGIN, MORNING_HOUR_MIDDLE);
+        gTimeBlend.altWeight = (DEFAULT_WEIGHT - gTimeBlend.weight) / 2;
+        gTimeOfDay = TIME_MORNING;
     }
-    else if (minutesOfDay < MORNING_MID_POINT) // night->twilight
+    else if (IsBetweenHours(hours, MORNING_HOUR_MIDDLE, MORNING_HOUR_END)) // morning->day
     {
-        currentTimeBlend.time0 = TIME_OF_DAY_NIGHT;
-        currentTimeBlend.time1 = TIME_OF_DAY_TWILIGHT;
-        currentTimeBlend.weight = 256 - 256 * (hours * 60 - MORNING_START_MINUTES + minutes) / (MORNING_MID_POINT - MORNING_START_MINUTES);
-        currentTimeBlend.altWeight = (256 - currentTimeBlend.weight) / 2;
-        gTimeOfDay = TIME_OF_DAY_DAY;
+        gTimeBlend.startBlend = gTimeOfDayBlend[TIME_MORNING];
+        gTimeBlend.endBlend = gTimeOfDayBlend[TIME_DAY];
+        gTimeBlend.weight = TIME_BLEND_WEIGHT(MORNING_HOUR_MIDDLE, MORNING_HOUR_END);
+        gTimeBlend.altWeight = (DEFAULT_WEIGHT - gTimeBlend.weight) / 2 + (DEFAULT_WEIGHT / 2);
+        gTimeOfDay = TIME_MORNING;
     }
-    else if (minutesOfDay < MORNING_END_MINUTES) // twilight->day
+    else if (IsBetweenHours(hours, EVENING_HOUR_BEGIN, EVENING_HOUR_END)) // evening
     {
-        currentTimeBlend.time0 = TIME_OF_DAY_TWILIGHT;
-        currentTimeBlend.time1 = TIME_OF_DAY_DAY;
-        currentTimeBlend.weight = 256 - 256 * (hours * 60 - MORNING_MID_POINT + minutes) / (MORNING_END_MINUTES - MORNING_MID_POINT);
-        currentTimeBlend.altWeight = (256 - currentTimeBlend.weight) / 2 + 128;
-        gTimeOfDay = TIME_OF_DAY_DAY;
+        gTimeBlend.startBlend = gTimeOfDayBlend[TIME_DAY];
+        gTimeBlend.endBlend = gTimeOfDayBlend[TIME_EVENING];
+        gTimeBlend.weight = TIME_BLEND_WEIGHT(EVENING_HOUR_BEGIN, EVENING_HOUR_END);
+        gTimeBlend.altWeight = gTimeBlend.weight / 2 + (DEFAULT_WEIGHT / 2);
+        gTimeOfDay = TIME_EVENING;
     }
-    else if (minutesOfDay < EVENING_START_MINUTES) // day
+    else if (IsBetweenHours(hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_BEGIN + 1)) // evening->night
     {
-        currentTimeBlend.weight = currentTimeBlend.altWeight = 256;
-        gTimeOfDay = currentTimeBlend.time0 = currentTimeBlend.time1 = TIME_OF_DAY_DAY;
+        gTimeBlend.startBlend = gTimeOfDayBlend[TIME_EVENING];
+        gTimeBlend.endBlend = gTimeOfDayBlend[TIME_NIGHT];
+        gTimeBlend.weight = TIME_BLEND_WEIGHT(NIGHT_HOUR_BEGIN, NIGHT_HOUR_BEGIN + 1);
+        gTimeBlend.altWeight = gTimeBlend.weight / 2;
+        gTimeOfDay = TIME_NIGHT;
     }
-    else if (minutesOfDay < EVENING_MID_POINT)
+    else if (IsBetweenHours(hours, NIGHT_HOUR_BEGIN, NIGHT_HOUR_END)) // night
     {
-        currentTimeBlend.time0 = TIME_OF_DAY_DAY;
-        currentTimeBlend.time1 = TIME_OF_DAY_TWILIGHT;
-        currentTimeBlend.weight = 256 - 256 * (hours * 60 - EVENING_START_MINUTES + minutes) / (EVENING_MID_POINT - EVENING_START_MINUTES);
-        currentTimeBlend.altWeight = currentTimeBlend.weight / 2 + 128;
-        gTimeOfDay = TIME_OF_DAY_TWILIGHT;
+        gTimeBlend.weight = DEFAULT_WEIGHT;
+        gTimeBlend.altWeight = 0;
+        gTimeBlend.startBlend = gTimeBlend.endBlend = gTimeOfDayBlend[TIME_NIGHT];
+        gTimeOfDay = TIME_NIGHT;
     }
-    else if (minutesOfDay < EVENING_END_MINUTES) // twilight->night
+    else // day
     {
-        currentTimeBlend.time0 = TIME_OF_DAY_TWILIGHT;
-        currentTimeBlend.time1 = TIME_OF_DAY_NIGHT;
-        currentTimeBlend.weight = 256 - 256 * (hours * 60 - EVENING_MID_POINT + minutes) / (EVENING_END_MINUTES - EVENING_MID_POINT);
-        currentTimeBlend.altWeight = currentTimeBlend.weight / 2;
-        gTimeOfDay = TIME_OF_DAY_NIGHT;
+        gTimeBlend.weight = gTimeBlend.altWeight = DEFAULT_WEIGHT;
+        gTimeBlend.startBlend = gTimeBlend.endBlend = gTimeOfDayBlend[TIME_DAY];
+        gTimeOfDay = TIME_DAY;
     }
-    else // 22-24, night
-    {
-        currentTimeBlend.weight = 256;
-        currentTimeBlend.altWeight = 0;
-        gTimeOfDay = currentTimeBlend.time0 = currentTimeBlend.time1 = TIME_OF_DAY_NIGHT;
-    }
-    return gTimeOfDay;
 }
+
+#undef TIME_BLEND_WEIGHT
 
 // Whether a map type is naturally lit/outside
 bool8 MapHasNaturalLight(u8 mapType)
@@ -1512,9 +1512,9 @@ void UpdateAltBgPalettes(u16 palettes)
         if (palettes & 1)
         {
             if (i < NUM_PALS_IN_PRIMARY)
-                AvgPaletteWeighted(&((u16*)primary->palettes)[i*16], &((u16*)primary->palettes)[((i+9)%16)*16], gPlttBufferUnfaded + i * 16, currentTimeBlend.altWeight);
+                AvgPaletteWeighted(&((u16*)primary->palettes)[i*16], &((u16*)primary->palettes)[((i+9)%16)*16], gPlttBufferUnfaded + i * 16, gTimeBlend.altWeight);
             else
-                AvgPaletteWeighted(&((u16*)secondary->palettes)[i*16], &((u16*)secondary->palettes)[((i+9)%16)*16], gPlttBufferUnfaded + i * 16, currentTimeBlend.altWeight);
+                AvgPaletteWeighted(&((u16*)secondary->palettes)[i*16], &((u16*)secondary->palettes)[((i+9)%16)*16], gPlttBufferUnfaded + i * 16, gTimeBlend.altWeight);
         }
         i++;
         palettes >>= 1;
@@ -1535,14 +1535,7 @@ void UpdatePalettesWithTime(u32 palettes)
         palettes &= PALETTES_MAP | PALETTES_OBJECTS; // Don't blend UI pals
         if (!palettes)
             return;
-        TimeMixPalettes(
-            palettes,
-            gPlttBufferUnfaded,
-            gPlttBufferFaded,
-            (struct BlendSettings *)&gTimeOfDayBlend[currentTimeBlend.time0],
-            (struct BlendSettings *)&gTimeOfDayBlend[currentTimeBlend.time1],
-            currentTimeBlend.weight
-        );
+        TimeMixPalettes(palettes, gPlttBufferUnfaded, gPlttBufferFaded, &gTimeBlend.startBlend, &gTimeBlend.endBlend, gTimeBlend.weight);
     }
 }
 
@@ -1550,15 +1543,9 @@ u8 UpdateSpritePaletteWithTime(u8 paletteNum)
 {
     if (MapHasNaturalLight(gMapHeader.mapType))
     {
-        if (GetSpritePaletteTagByPaletteNum(paletteNum) != 0xFFFF && IS_BLEND_IMMUNE_TAG(GetSpritePaletteTagByPaletteNum(paletteNum)))
+        if (IS_BLEND_IMMUNE_TAG(GetSpritePaletteTagByPaletteNum(paletteNum)))
             return paletteNum;
-        TimeMixPalettes(1,
-                        &gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum)],
-                        &gPlttBufferFaded[OBJ_PLTT_ID(paletteNum)],
-                        (struct BlendSettings *)&gTimeOfDayBlend[currentTimeBlend.time0],
-                        (struct BlendSettings *)&gTimeOfDayBlend[currentTimeBlend.time1],
-                        currentTimeBlend.weight
-        );
+        TimeMixPalettes(1, &gPlttBufferUnfaded[OBJ_PLTT_ID(paletteNum)], &gPlttBufferFaded[OBJ_PLTT_ID(paletteNum)], &gTimeBlend.startBlend, &gTimeBlend.endBlend, gTimeBlend.weight);
     }
     return paletteNum;
 }
@@ -1575,18 +1562,16 @@ static void OverworldBasic(void)
     UpdateTilesetAnimations();
     DoScheduledBgTilemapCopiesToVram();
     // Every minute if no palette fade is active, update TOD blending as needed
-    if (!gPaletteFade.active && ++gTimeUpdateCounter >= (SECONDS_PER_MINUTE * 60 / FakeRtc_GetSecondsRatio()))
+    if (!gPaletteFade.active && --gTimeUpdateCounter <= 0 && ++gTimeUpdateCounter >= (SECONDS_PER_MINUTE * 60 / FakeRtc_GetSecondsRatio()))
     {
-        struct TimeBlendSettings cachedBlend = {
-            .time0 = currentTimeBlend.time0,
-            .time1 = currentTimeBlend.time1,
-            .weight = currentTimeBlend.weight,
-        };
-        gTimeUpdateCounter = 0;
+        struct TimeBlendSettings cachedBlend = gTimeBlend;
+        u32 *bld0 = (u32*)&cachedBlend;
+        u32 *bld1 = (u32*)&gTimeBlend;
+        gTimeUpdateCounter = (SECONDS_PER_MINUTE * 60 / FakeRtc_GetSecondsRatio());
         UpdateTimeOfDay();
-        if (cachedBlend.time0 != currentTimeBlend.time0
-            || cachedBlend.time1 != currentTimeBlend.time1
-            || cachedBlend.weight != currentTimeBlend.weight)
+        if (bld0[0] != bld1[0]
+         || bld0[1] != bld1[1]
+         || bld0[2] != bld1[2])
         {
            UpdateAltBgPalettes(PALETTES_BG);
            UpdatePalettesWithTime(PALETTES_ALL);
@@ -1865,7 +1850,7 @@ static void VBlankCB_Field(void)
 
 static void InitCurrentFlashLevelScanlineEffect(void)
 {
-    u8 flashLevel = Overworld_GetFlashLevel();
+    u8 flashLevel = GetFlashLevel();
     if (flashLevel != 0)
     {
         WriteFlashScanlineEffectBuffer(flashLevel);
@@ -3491,8 +3476,197 @@ static void SpriteCB_LinkPlayer(struct Sprite *sprite)
     }
 }
 
+// ----------------
+// Item Header Descriptions
+// Item Description Header
+
+#define ITEM_ICON_X     26
+#define ITEM_ICON_Y     24
+#define ITEM_TAG        0x2722 //same as money label
+
+bool8 GetSetItemObtained(u16 item, enum ItemObtainFlags caseId)
+{
+#if OW_SHOW_ITEM_DESCRIPTIONS == OW_ITEM_DESCRIPTIONS_FIRST_TIME
+    u8 index = item / 8;
+    u8 bit = item % 8;
+    u8 mask = 1 << bit;
+    switch (caseId)
+    {
+    case FLAG_GET_ITEM_OBTAINED:
+        return gSaveBlock3Ptr->itemFlags[index] & mask;
+    case FLAG_SET_ITEM_OBTAINED:
+        gSaveBlock3Ptr->itemFlags[index] |= mask;
+        return TRUE;
+    }
+#endif
+    return FALSE;
+}
 
 #if OW_SHOW_ITEM_DESCRIPTIONS != OW_ITEM_DESCRIPTIONS_OFF
+
+EWRAM_DATA static u8 sHeaderBoxWindowId = 0;
+EWRAM_DATA u8 sItemIconSpriteId = 0;
+EWRAM_DATA u8 sItemIconSpriteId2 = 0;
+
+static void ShowItemIconSprite(u16 item, bool8 firstTime, bool8 flash);
+static void DestroyItemIconSprite(void);
+
+static u8 ReformatItemDescription(u16 item, u8 *dest)
+{
+    u8 count = 0;
+    u8 numLines = 1;
+    u8 maxChars = 32;
+    u8 *desc = (u8 *)gItemsInfo[item].description;
+
+    while (*desc != EOS)
+    {
+        if (count >= maxChars)
+        {
+            while (*desc != CHAR_SPACE && *desc != CHAR_NEWLINE)
+            {
+                *dest = *desc;  //finish word
+                dest++;
+                desc++;
+            }
+
+            *dest = CHAR_NEWLINE;
+            count = 0;
+            numLines++;
+            dest++;
+            desc++;
+            continue;
+        }
+
+        *dest = *desc;
+        if (*desc == CHAR_NEWLINE)
+        {
+            *dest = CHAR_SPACE;
+        }
+
+        dest++;
+        desc++;
+        count++;
+    }
+
+    // finish string
+    *dest = EOS;
+    return numLines;
+}
+
+void ScriptShowItemDescription(struct ScriptContext *ctx)
+{
+    u8 headerType = ScriptReadByte(ctx);
+    struct WindowTemplate template;
+    u16 item = gSpecialVar_0x8006;
+    u8 textY;
+    u8 *dst;
+    bool8 handleFlash = FALSE;
+
+    if (GetFlashLevel() > 0)
+        handleFlash = TRUE;
+
+    if (headerType == 1) // berry
+        dst = gStringVar3;
+    else
+        dst = gStringVar1;
+
+    if (GetSetItemObtained(item, FLAG_GET_ITEM_OBTAINED))
+    {
+        ShowItemIconSprite(item, FALSE, handleFlash);
+        return; //no box if item obtained previously
+    }
+
+    SetWindowTemplateFields(&template, 0, 1, 1, 28, 3, 15, 8);
+    sHeaderBoxWindowId = AddWindow(&template);
+    FillWindowPixelBuffer(sHeaderBoxWindowId, PIXEL_FILL(0));
+    PutWindowTilemap(sHeaderBoxWindowId);
+    CopyWindowToVram(sHeaderBoxWindowId, 3);
+    SetStandardWindowBorderStyle(sHeaderBoxWindowId, FALSE);
+    DrawStdFrameWithCustomTileAndPalette(sHeaderBoxWindowId, FALSE, 0x214, 14);
+
+    if (ReformatItemDescription(item, dst) == 1)
+        textY = 4;
+    else
+        textY = 0;
+
+    ShowItemIconSprite(item, TRUE, handleFlash);
+    AddTextPrinterParameterized(sHeaderBoxWindowId, 0, dst, ITEM_ICON_X + 2, textY, 0, NULL);
+}
+
+void ScriptHideItemDescription(struct ScriptContext *ctx)
+{
+    DestroyItemIconSprite();
+
+    if (!GetSetItemObtained(gSpecialVar_0x8006, FLAG_GET_ITEM_OBTAINED))
+    {
+        //header box only exists if haven't seen item before
+        GetSetItemObtained(gSpecialVar_0x8006, FLAG_SET_ITEM_OBTAINED);
+        ClearStdWindowAndFrameToTransparent(sHeaderBoxWindowId, FALSE);
+        CopyWindowToVram(sHeaderBoxWindowId, 3);
+        RemoveWindow(sHeaderBoxWindowId);
+    }
+}
+
+static void ShowItemIconSprite(u16 item, bool8 firstTime, bool8 flash)
+{
+    s16 x = 0, y = 0;
+    u8 iconSpriteId;
+    u8 spriteId2 = MAX_SPRITES;
+
+    if (flash)
+    {
+        SetGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_OBJWIN_ON);
+        SetGpuRegBits(REG_OFFSET_WINOUT, WINOUT_WINOBJ_OBJ);
+    }
+
+    iconSpriteId = AddItemIconSprite(ITEM_TAG, ITEM_TAG, item);
+    if (flash)
+        spriteId2 = AddItemIconSprite(ITEM_TAG, ITEM_TAG, item);
+    if (iconSpriteId != MAX_SPRITES)
+    {
+        if (!firstTime)
+        {
+            //show in message box
+            x = 213;
+            y = 140;
+        }
+        else
+        {
+            // show in header box
+            x = ITEM_ICON_X;
+            y = ITEM_ICON_Y;
+        }
+
+        gSprites[iconSpriteId].x2 = x;
+        gSprites[iconSpriteId].y2 = y;
+        gSprites[iconSpriteId].oam.priority = 0;
+    }
+
+    if (spriteId2 != MAX_SPRITES)
+    {
+        gSprites[spriteId2].x2 = x;
+        gSprites[spriteId2].y2 = y;
+        gSprites[spriteId2].oam.priority = 0;
+        gSprites[spriteId2].oam.objMode = ST_OAM_OBJ_WINDOW;
+        sItemIconSpriteId2 = spriteId2;
+    }
+
+    sItemIconSpriteId = iconSpriteId;
+}
+
+static void DestroyItemIconSprite(void)
+{
+    FreeSpriteTilesByTag(ITEM_TAG);
+    FreeSpritePaletteByTag(ITEM_TAG);
+    FreeSpriteOamMatrix(&gSprites[sItemIconSpriteId]);
+    DestroySprite(&gSprites[sItemIconSpriteId]);
+
+    if ((GetFlashLevel() > 0) && sItemIconSpriteId2 != MAX_SPRITES)
+    {
+        FreeSpriteOamMatrix(&gSprites[sItemIconSpriteId2]);
+        DestroySprite(&gSprites[sItemIconSpriteId2]);
+    }
+}
 
 #else
 void ScriptShowItemDescription(struct ScriptContext *ctx)

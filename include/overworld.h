@@ -54,14 +54,6 @@ enum {
     MUSIC_DISABLE_KEEP,
 };
 
-struct __attribute__((packed)) TimeBlendSettings {
-  u16 weight:9;
-  u16 time1:3;
-  u16 time0:3;
-  u16 unused:1;
-  u16 altWeight;
-};
-
 
 extern struct WarpData gLastUsedWarp;
 extern struct LinkPlayerObjectEvent gLinkPlayerObjectEvents[4];
@@ -81,7 +73,7 @@ extern u8 gGlobalFieldTintMode;
 extern u8 gTimeOfDay;
 extern u16 gTimeUpdateCounter;
 
-extern struct TimeBlendSettings currentTimeBlend;
+extern struct TimeBlendSettings gTimeBlend;
 
 extern const struct Coords32 gDirectionToVectors[];
 
@@ -105,7 +97,7 @@ void Overworld_ClearSavedMusic(void);
 bool32 Overworld_MusicCanOverrideMapMusic(u16 song);
 
 void SetFlashLevel(s32 a1);
-u8 Overworld_GetFlashLevel(void);
+u8 GetFlashLevel(void);
 
 void Overworld_SetSavedMusic(u16);
 void Overworld_ChangeMusicToDefault(void);
@@ -192,7 +184,7 @@ u16 SetLinkWaitingForScript(void);
 void SetMainCallback1(MainCallback cb);
 void CB1_Overworld(void);
 void CB2_ReturnToFieldContinueScript(void);
-u8 UpdateTimeOfDay(void);
+void UpdateTimeOfDay(void);
 bool8 MapHasNaturalLight(u8 mapType);
 void UpdateAltBgPalettes(u16 palettes);
 void UpdatePalettesWithTime(u32);
@@ -202,5 +194,13 @@ void UpdateEscapeWarp(s16 x, s16 y);
 bool8 SetDiveWarpEmerge(u16 x, u16 y);
 bool8 SetDiveWarpDive(u16 x, u16 y);
 u8 UpdateSpritePaletteWithTime(u8 paletteNum);
+
+// Item Description Headers
+enum ItemObtainFlags
+{
+    FLAG_GET_ITEM_OBTAINED,
+    FLAG_SET_ITEM_OBTAINED,
+};
+bool8 GetSetItemObtained(u16 item, enum ItemObtainFlags caseId);
 
 #endif //GUARD_OVERWORLD_H

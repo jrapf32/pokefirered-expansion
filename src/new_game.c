@@ -35,6 +35,7 @@
 
 // this file's functions
 static void ResetMiniGamesResults(void);
+static void ResetItemFlags(void);
 
 // EWRAM vars
 EWRAM_DATA bool8 gDifferentSaveFile = FALSE;
@@ -155,6 +156,7 @@ void NewGameInitData(void)
     RunScriptImmediately(EventScript_ResetAllMapFlags);
     StringCopy(gSaveBlock1Ptr->rivalName, rivalName);
     ResetTrainerTowerResults();
+    ResetItemFlags();
 }
 
 static void ResetMiniGamesResults(void)
@@ -163,4 +165,11 @@ static void ResetMiniGamesResults(void)
     SetBerryPowder(&gSaveBlock2Ptr->berryCrush.berryPowderAmount, 0);
     ResetPokemonJumpRecords();
     CpuFill16(0, &gSaveBlock2Ptr->berryPick, sizeof(struct BerryPickingResults));
+}
+
+static void ResetItemFlags(void)
+{
+#if OW_SHOW_ITEM_DESCRIPTIONS == OW_ITEM_DESCRIPTIONS_FIRST_TIME
+    memset(&gSaveBlock3Ptr->itemFlags, 0, sizeof(gSaveBlock3Ptr->itemFlags));
+#endif
 }
