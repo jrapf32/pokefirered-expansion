@@ -1050,6 +1050,7 @@ void DrawMultichoiceMenuInternal(u8 left, u8 top, u8 multichoiceId, bool8 ignore
     u8 height;
     u8 windowId;
 
+    ignoreBPress &= 1;
     strWidth = 0;
     for (i = 0; i < count; i++)
     {
