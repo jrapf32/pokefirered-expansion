@@ -518,11 +518,20 @@ static void PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
         }
         return;
     }
-
+    
+    gPlayerAvatar.creeping = FALSE;
     if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
     {
-        // Same speed as running
-        PlayerWalkFast(direction);
+        if (FlagGet(DN_FLAG_SEARCHING) && (heldKeys & A_BUTTON))
+        {
+            gPlayerAvatar.creeping = TRUE;
+            PlayerWalkSlow(direction);
+        }
+        else
+        {
+            // Same speed as running
+            PlayerWalkFast(direction);
+        }
         return;
     }
 
@@ -535,6 +544,11 @@ static void PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
             PlayerRun(direction);
         gPlayerAvatar.flags |= PLAYER_AVATAR_FLAG_DASH;
         return;
+    }
+    else if (FlagGet(DN_FLAG_SEARCHING) && (heldKeys & A_BUTTON))
+    {
+        gPlayerAvatar.creeping = TRUE;
+        PlayerWalkSlow(direction);
     }
     else
     {
