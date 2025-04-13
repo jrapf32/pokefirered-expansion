@@ -35,6 +35,13 @@ EWRAM_DATA u16 gSpecialVar_PrevTextColor = 0;
 EWRAM_DATA u16 gSpecialVar_0x8014 = 0;
 EWRAM_DATA u8 sSpecialFlags[SPECIAL_FLAGS_SIZE] = {};
 
+#if TESTING
+#define TEST_FLAGS_SIZE     1
+#define TEST_VARS_SIZE      8
+EWRAM_DATA static u8 sTestFlags[TEST_FLAGS_SIZE] = {0};
+EWRAM_DATA static u16 sTestVars[TEST_VARS_SIZE] = {0};
+#endif // TESTING
+
 extern u16 *const gSpecialVars[];
 
 const u16 gBadgeFlags[NUM_BADGES] =
@@ -186,6 +193,10 @@ u16 *GetVarPointer(u16 id)
         return NULL;
     else if (id < SPECIAL_VARS_START)
         return &gSaveBlock1Ptr->vars[id - VARS_START];
+#if TESTING
+    else if (id >= TESTING_VARS_START)
+        return &sTestVars[id - TESTING_VARS_START];
+#endif // TESTING
     else
         return gSpecialVars[id - SPECIAL_VARS_START];
 }
@@ -226,6 +237,10 @@ u8 *GetFlagAddr(u16 idx)
         return NULL;
     if (idx < SPECIAL_FLAGS_START)
         return &gSaveBlock1Ptr->flags[idx / 8];
+#if TESTING
+    else if (idx >= TESTING_FLAGS_START)
+        return &sTestFlags[(idx - TESTING_FLAGS_START) / 8];
+#endif // TESTING
     return &sSpecialFlags[(idx - SPECIAL_FLAGS_START) / 8];
 }
 
