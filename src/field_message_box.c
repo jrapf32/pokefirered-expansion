@@ -26,7 +26,7 @@ static void Task_DrawFieldMessageBox(u8 taskId)
         if (!IsMsgSignpost())
             LoadMessageBoxAndBorderGfx();
         else
-            LoadSignpostWindowFrameGfx();
+            LoadSignPostWindowFrameGfx();
         task->data[0]++;
         break;
     case 1:

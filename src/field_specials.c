@@ -25,7 +25,7 @@
 #include "item.h"
 #include "menu_indicators.h"
 #include "random.h"
-#include "mail_data.h"
+#include "mail.h"
 #include "pokemon_storage_system.h"
 #include "script_menu.h"
 #include "data.h"

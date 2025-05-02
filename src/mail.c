@@ -7,7 +7,6 @@
 #include "mail.h"
 #include "task.h"
 #include "menu.h"
-#include "mail_data.h"
 #include "player_pc.h"
 #include "overworld.h"
 #include "menu_helpers.h"
@@ -586,7 +585,7 @@ static bool8 DoInitMailView(void)
         gPaletteFade.bufferTransferDisabled = TRUE;
         break;
     case 17:
-        iconId = MailSpeciesToIconSpecies(sMailViewResources->mail->species);
+        iconId = GetIconSpeciesNoPersonality(sMailViewResources->mail->species);
         switch (sMailViewResources->monIconType)
         {
         case MAIL_ICON_BEAD:
@@ -716,8 +715,8 @@ static void ShowMailCB_Teardown(void)
         {
         case MAIL_ICON_BEAD:
         case MAIL_ICON_DREAM:
-            FreeMonIconPalette(MailSpeciesToIconSpecies(sMailViewResources->mail->species));
-            DestroyMonIcon(&gSprites[sMailViewResources->monIconSpriteId]);
+            FreeMonIconPalette(GetIconSpeciesNoPersonality(sMailViewResources->mail->species));
+            FreeAndDestroyMonIconSprite(&gSprites[sMailViewResources->monIconSpriteId]);
             break;
         }
         *sMailViewResources = (struct MailViewResources){};

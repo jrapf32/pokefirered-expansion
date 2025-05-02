@@ -6,7 +6,6 @@
 #include "strings.h"
 #include "menu.h"
 #include "mail.h"
-#include "mail_data.h"
 #include "overworld.h"
 #include "script.h"
 #include "mailbox_pc.h"

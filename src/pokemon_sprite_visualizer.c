@@ -41,7 +41,7 @@
 #include "constants/items.h"
 #include "constants/event_objects.h"
 
-extern const struct BattleTerrain gBattleTerrainInfo[BATTLE_TERRAIN_COUNT];
+extern const struct BattleTerrain gBattleEnvironmentInfo[BATTLE_ENVIRONMENT_COUNT];
 extern const struct CompressedSpriteSheet gSpriteSheet_EnemyShadow;
 extern const struct CompressedSpriteSheet gSpriteSheet_EnemyShadowsSized;
 extern const struct SpriteTemplate gSpriteTemplate_EnemyShadow;
@@ -728,12 +728,11 @@ static void UpdateBattlerValue(struct PokemonSpriteVisualizer *data)
 
 static void BattleLoadOpponentMonSpriteGfxCustom(u16 species, bool8 isFemale, bool8 isShiny, u8 battlerId)
 {
-    const u32 *lzPaletteData = GetMonSpritePalFromSpecies(species, isShiny, isFemale);
+    const u16 *palette = GetMonSpritePalFromSpecies(species, isShiny, isFemale);
     u16 paletteOffset = OBJ_PLTT_ID(battlerId);
 
-    LZDecompressWram(lzPaletteData, gDecompressionBuffer);
-    LoadPalette(gDecompressionBuffer, paletteOffset, PLTT_SIZE_4BPP);
-    LoadPalette(gDecompressionBuffer, BG_PLTT_ID(8) + BG_PLTT_ID(battlerId), PLTT_SIZE_4BPP);
+    LoadPalette(palette, paletteOffset, PLTT_SIZE_4BPP);
+    LoadPalette(palette, BG_PLTT_ID(8) + BG_PLTT_ID(battlerId), PLTT_SIZE_4BPP);
 }
 
 static void SetConstSpriteValues(struct PokemonSpriteVisualizer *data)
@@ -918,7 +917,7 @@ static void LoadBattleBg(u8 battleBgType, u8 battleTerrain)
     case MAP_BATTLE_SCENE_NORMAL:
         break;
     case MAP_BATTLE_SCENE_GYM:
-        battleTerrain = BATTLE_TERRAIN_GYM;
+        battleTerrain = BATTLE_ENVIRONMENT_GYM;
         break;
     case MAP_BATTLE_SCENE_MAGMA:
         // todo
@@ -927,40 +926,40 @@ static void LoadBattleBg(u8 battleBgType, u8 battleTerrain)
         // todo
         break;
     case MAP_BATTLE_SCENE_LORELEI:
-        battleTerrain = BATTLE_TERRAIN_LORELEI;
+        battleTerrain = BATTLE_ENVIRONMENT_LORELEI;
         break;
     case MAP_BATTLE_SCENE_BRUNO:
-        battleTerrain = BATTLE_TERRAIN_BRUNO;
+        battleTerrain = BATTLE_ENVIRONMENT_BRUNO;
         break;
     case MAP_BATTLE_SCENE_AGATHA:
-        battleTerrain = BATTLE_TERRAIN_AGATHA;
+        battleTerrain = BATTLE_ENVIRONMENT_AGATHA;
         break;
     case MAP_BATTLE_SCENE_LANCE:
-        battleTerrain = BATTLE_TERRAIN_LANCE;
+        battleTerrain = BATTLE_ENVIRONMENT_LANCE;
         break;
     case MAP_BATTLE_SCENE_FRONTIER:
         // todo
         break;
     case MAP_BATTLE_SCENE_LEADER:
-        battleTerrain = BATTLE_TERRAIN_LEADER;
+        battleTerrain = BATTLE_ENVIRONMENT_LEADER;
         break;
     case MAP_BATTLE_SCENE_CHAMPION:
-        battleTerrain = BATTLE_TERRAIN_CHAMPION;
+        battleTerrain = BATTLE_ENVIRONMENT_CHAMPION;
         break;
     case MAP_BATTLE_SCENE_GROUDON:
-        battleTerrain = BATTLE_TERRAIN_CAVE;
+        battleTerrain = BATTLE_ENVIRONMENT_CAVE;
         break;
     case MAP_BATTLE_SCENE_KYOGRE:
-        battleTerrain = BATTLE_TERRAIN_WATER;
+        battleTerrain = BATTLE_ENVIRONMENT_WATER;
         break;
     case MAP_BATTLE_SCENE_RAYQUAZA:
         // todo
         break;
     }
     
-    LZDecompressVram(gBattleTerrainInfo[battleTerrain].background.tileset, (void*)(BG_CHAR_ADDR(2)));
-    LZDecompressVram(gBattleTerrainInfo[battleTerrain].background.tilemap, (void*)(BG_SCREEN_ADDR(26)));
-    LoadCompressedPalette(GetBattleBackgroundPalette(battleTerrain), 0x20, 0x60);
+    LZDecompressVram(gBattleEnvironmentInfo[battleTerrain].background.tileset, (void*)(BG_CHAR_ADDR(2)));
+    LZDecompressVram(gBattleEnvironmentInfo[battleTerrain].background.tilemap, (void*)(BG_SCREEN_ADDR(26)));
+    LoadPalette(GetBattleBackgroundPalette(battleTerrain), 0x20, 0x60);
 }
 static void PrintBattleBgName(u8 taskId)
 {
@@ -969,7 +968,7 @@ static void PrintBattleBgName(u8 taskId)
     u8 text[30+1];
 
     if (data->battleBgType == 0)
-        StringCopy(text, gBattleTerrainInfo[data->battleTerrain].name);
+        StringCopy(text, gBattleEnvironmentInfo[data->battleTerrain].name);
     else
         StringCopy(text, gBattleBackgroundNames[data->battleBgType]);
     AddTextPrinterParameterized(WIN_BOTTOM_RIGHT, fontId, text, 0, 24, 0, NULL);
@@ -982,14 +981,14 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
     {
         if (increment)
         {
-            if (data->battleTerrain == BATTLE_TERRAIN_PLAIN)
+            if (data->battleTerrain == BATTLE_ENVIRONMENT_PLAIN)
                 data->battleBgType += 1;
             else
                 data->battleTerrain += 1;
         }
         else
         {
-            if (data->battleTerrain == BATTLE_TERRAIN_GRASS)
+            if (data->battleTerrain == BATTLE_ENVIRONMENT_GRASS)
                 data->battleBgType = MAP_BATTLE_SCENE_RAYQUAZA;
             else
                 data->battleTerrain -= 1;
@@ -1002,7 +1001,7 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
         else
         {
             data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
-            data->battleTerrain = BATTLE_TERRAIN_PLAIN;
+            data->battleTerrain = BATTLE_ENVIRONMENT_PLAIN;
         }
     }
     else if (data->battleBgType == MAP_BATTLE_SCENE_RAYQUAZA)
@@ -1010,7 +1009,7 @@ static void UpdateBattleBg(u8 taskId, bool8 increment)
         if (increment)
         {
             data->battleBgType = MAP_BATTLE_SCENE_NORMAL;
-            data->battleTerrain = BATTLE_TERRAIN_GRASS;
+            data->battleTerrain = BATTLE_ENVIRONMENT_GRASS;
         }
         else
             data->battleBgType -= 1;
@@ -1176,7 +1175,7 @@ static void ResetPokemonSpriteVisualizerWindows(void)
 void CB2_Pokemon_Sprite_Visualizer(void)
 {
     u8 taskId;
-    const u32 *palette;
+    const u16 *palette;
     struct PokemonSpriteVisualizer *data;
     u16 species;
     s16 offset_y;
@@ -1208,7 +1207,7 @@ void CB2_Pokemon_Sprite_Visualizer(void)
 
             FillBgTilemapBufferRect(0, 0, 0, 0, 32, 20, 15);
             InitBgsFromTemplates(0, sBgTemplates, ARRAY_COUNT(sBgTemplates));
-            LoadBattleBg(0, BATTLE_TERRAIN_GRASS);
+            LoadBattleBg(0, BATTLE_ENVIRONMENT_GRASS);
 
             gMain.state++;
             break;
@@ -1242,7 +1241,7 @@ void CB2_Pokemon_Sprite_Visualizer(void)
 
             //Palettes
             palette = GetMonSpritePalFromSpecies(species, data->isShiny, data->isFemale);
-            LoadCompressedSpritePaletteWithTag(palette, species);
+            LoadSpritePaletteWithTag(palette, species);
             //Front
             HandleLoadSpecialPokePic(TRUE, gMonSpritesGfxPtr->spritesGfx[1], species, (data->isFemale ? FEMALE_PERSONALITY : MALE_PERSONALITY));
             data->isShiny = FALSE;
@@ -1905,7 +1904,7 @@ static void HandleInput_PokemonSpriteVisualizer(u8 taskId)
 
 static void ReloadPokemonSprites(struct PokemonSpriteVisualizer *data)
 {
-    const u32 *palette;
+    const u16 *palette;
     u16 species = data->currentmonId;
     s16 offset_y;
     u8 front_x = sBattlerCoords[0][1].x;
@@ -1935,7 +1934,7 @@ static void ReloadPokemonSprites(struct PokemonSpriteVisualizer *data)
 
     //Palettes
     palette = GetMonSpritePalFromSpecies(species, data->isShiny, data->isFemale);
-    LoadCompressedSpritePaletteWithTag(palette, species);
+    LoadSpritePaletteWithTag(palette, species);
     //Front
     HandleLoadSpecialPokePic(TRUE, gMonSpritesGfxPtr->spritesGfx[1], species, (data->isFemale ? FEMALE_PERSONALITY : MALE_PERSONALITY));
     BattleLoadOpponentMonSpriteGfxCustom(species, data->isFemale, data->isShiny, 1);

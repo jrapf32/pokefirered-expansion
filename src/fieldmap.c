@@ -871,7 +871,7 @@ static void LoadTilesetPalette(struct Tileset const *tileset, u16 destOffset, u1
         }
         else
         {
-            LoadCompressedPalette((const u32 *)tileset->palettes, destOffset, size);
+            LoadPalette((const u32 *)tileset->palettes, destOffset, size);
         }
         // convert legacy light palette system to current
         if (tileset->lightPalettes)
