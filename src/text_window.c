@@ -4,13 +4,11 @@
 #include "window.h"
 
 #include "graphics.h"
-#include "help_message.h"
 #include "palette.h"
 #include "text_window.h"
 
 static const u16 gSignpostWindow_Gfx[] = INCBIN_U16("graphics/text_window/signpost.4bpp");
 static const u16 sStdTextWindow_Gfx[]  = INCBIN_U16("graphics/text_window/std.4bpp");
-static const u16 sQuestLogWindow_Gfx[] = INCBIN_U16("graphics/text_window/quest_log.4bpp");
 
 static const u8 sTextWindowFrame1_Gfx[]  = INCBIN_U8("graphics/text_window/type1.4bpp");
 static const u8 sTextWindowFrame2_Gfx[]  = INCBIN_U8("graphics/text_window/type2.4bpp");
@@ -73,12 +71,26 @@ void LoadStdWindowGfxOnBg(u8 bgId, u16 destOffset, u8 palOffset)
     LoadPalette(GetTextWindowPalette(3), palOffset, PLTT_SIZE_4BPP);
 }
 
-void LoadStdWindowGfx(u8 windowId, u16 destOffset, u8 palOffset)
+void LoadSignpostWindowGfx(u8 windowId, u16 destOffset, u8 palOffset)
 {
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sStdTextWindow_Gfx, 0x120, destOffset);
-    LoadPalette(GetTextWindowPalette(3), palOffset, PLTT_SIZE_4BPP);
+    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), gSignpostWindow_Gfx, 0x260, destOffset);
+    LoadPalette(GetTextWindowPalette(1), palOffset, PLTT_SIZE_4BPP);
 }
 
+void LoadStdWindowGfx(u8 windowId, u16 destOffset, u8 palOffset)
+ 
+{
+ 
+    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sStdTextWindow_Gfx, 0x120, destOffset);
+ 
+    LoadPalette(GetTextWindowPalette(3), palOffset, PLTT_SIZE_4BPP);
+ 
+}
+
+void LoadStdWindowTiles(u8 windowId, u16 destOffset)
+{
+    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sStdTextWindow_Gfx, 0x120, destOffset);
+}
 void LoadMessageBoxGfx(u8 windowId, u16 destOffset, u8 palOffset)
 {
     LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), gMessageBox_Gfx, 0x280, destOffset);
@@ -188,21 +200,4 @@ void LoadDexNavWindowGfx(u8 windowId, u16 destOffset, u8 palOffset)
 {
     LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sDexNavWindowFrame.tiles, 0x120, destOffset);
     LoadPalette(sDexNavWindowFrame.pal, palOffset, 32);
-}
-
-// FRLG
-void LoadHelpMessageWindowGfx(u8 windowId, u16 destOffset, u8 palOffset)
-{
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), gHelpMessageWindow_Gfx, 0x280, destOffset);
-    LoadPalette(GetTextWindowPalette(2), palOffset, PLTT_SIZE_4BPP);
-}
-
-void LoadStdWindowTiles(u8 windowId, u16 destOffset)
-{
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sStdTextWindow_Gfx, 0x120, destOffset);
-}
-
-void LoadQuestLogWindowTiles(u8 windowId, u16 destOffset)
-{
-    LoadBgTiles(GetWindowAttribute(windowId, WINDOW_BG), sQuestLogWindow_Gfx, 0x280, destOffset);
 }

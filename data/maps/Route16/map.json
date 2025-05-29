@@ -111,6 +111,7 @@
       "flag": "0"
     },
     {
+      "local_id": "LOCALID_ROUTE16_CUT_TREE",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_CUT_TREE",
       "x": 41,
@@ -204,9 +205,7 @@
       "dest_warp_id": "3"
     }
   ],
-  "coord_events": [
-
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

@@ -19,7 +19,7 @@
 #include "metatile_behavior.h"
 #include "overworld.h"
 #include "renewable_hidden_items.h"
-#include "quest_log.h"
+
 #include "safari_zone.h"
 #include "script.h"
 #include "start_menu.h"
@@ -40,8 +40,6 @@
 #define SIGNPOST_SCRIPTED 240
 #define SIGNPOST_NA 255
 
-static void QuestLogOverrideJoyVars(struct FieldInput *input, u16 *newKeys, u16 *heldKeys);
-static void Task_QuestLogPlayback_OpenStartMenu(u8 taskId);
 static void GetPlayerPosition(struct MapPosition * position);
 static u16 GetPlayerCurMetatileBehavior(void);
 static bool8 TryStartInteractionScript(struct MapPosition * position, u16 metatileBehavior, u8 playerDirection);
@@ -101,39 +99,30 @@ void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
     u8 tileTransitionState = gPlayerAvatar.tileTransitionState;
     bool8 forcedMove = MetatileBehavior_IsForcedMovementTile(GetPlayerCurMetatileBehavior());
 
-    if (!ScriptContext_IsEnabled() && IsQuestLogInputDpad() == TRUE)
-    {
-        QuestLogOverrideJoyVars(input, &newKeys, &heldKeys);
-    }
     if ((tileTransitionState == T_TILE_CENTER && forcedMove == FALSE) || tileTransitionState == T_NOT_MOVING)
     {
         if (GetPlayerSpeed() != PLAYER_SPEED_FASTEST)
         {
             if ((newKeys & START_BUTTON) && !(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED))
                 input->pressedStartButton = TRUE;
-            if (!QL_IS_PLAYBACK_STATE)
+            if (!(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED))
             {
-                if (!(gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_FORCED))
-                {
-                    if (newKeys & SELECT_BUTTON)
-                        input->pressedSelectButton = TRUE;
-                    if (newKeys & A_BUTTON)
-                        input->pressedAButton = TRUE;
-                    if (newKeys & B_BUTTON)
-                        input->pressedBButton = TRUE;
-                    if (newKeys & R_BUTTON && !FlagGet(DN_FLAG_SEARCHING))
-                        input->pressedRButton = TRUE;
-                }
+                if (newKeys & SELECT_BUTTON)
+                    input->pressedSelectButton = TRUE;
+                if (newKeys & A_BUTTON)
+                    input->pressedAButton = TRUE;
+                if (newKeys & B_BUTTON)
+                    input->pressedBButton = TRUE;
+                if (newKeys & R_BUTTON && !FlagGet(DN_FLAG_SEARCHING))
+                    input->pressedRButton = TRUE;
             }
+            
         }
 
-        if (!QL_IS_PLAYBACK_STATE)
+        if (heldKeys & (DPAD_UP | DPAD_DOWN | DPAD_LEFT | DPAD_RIGHT))
         {
-            if (heldKeys & (DPAD_UP | DPAD_DOWN | DPAD_LEFT | DPAD_RIGHT))
-            {
-                input->heldDirection = TRUE;
-                input->heldDirection2 = TRUE;
-            }
+            input->heldDirection = TRUE;
+            input->heldDirection2 = TRUE;
         }
 
     }
@@ -146,62 +135,25 @@ void FieldGetPlayerInput(struct FieldInput *input, u16 newKeys, u16 heldKeys)
             input->checkStandardWildEncounter = TRUE;
     }
 
-    if (!QL_IS_PLAYBACK_STATE)
-    {
-        if (heldKeys & DPAD_UP)
-            input->dpadDirection = DIR_NORTH;
-        else if (heldKeys & DPAD_DOWN)
-            input->dpadDirection = DIR_SOUTH;
-        else if (heldKeys & DPAD_LEFT)
-            input->dpadDirection = DIR_WEST;
-        else if (heldKeys & DPAD_RIGHT)
-            input->dpadDirection = DIR_EAST;
+    if (heldKeys & DPAD_UP)
+        input->dpadDirection = DIR_NORTH;
+    else if (heldKeys & DPAD_DOWN)
+        input->dpadDirection = DIR_SOUTH;
+    else if (heldKeys & DPAD_LEFT)
+        input->dpadDirection = DIR_WEST;
+    else if (heldKeys & DPAD_RIGHT)
+        input->dpadDirection = DIR_EAST;
 
-        if(DEBUG_OVERWORLD_MENU && !DEBUG_OVERWORLD_IN_MENU)
+    if(DEBUG_OVERWORLD_MENU && !DEBUG_OVERWORLD_IN_MENU)
+    {
+        if ((heldKeys & DEBUG_OVERWORLD_HELD_KEYS) && input->DEBUG_OVERWORLD_TRIGGER_EVENT)
         {
-            if ((heldKeys & DEBUG_OVERWORLD_HELD_KEYS) && input->DEBUG_OVERWORLD_TRIGGER_EVENT)
-            {
-                input->input_field_1_2 = TRUE;
-                input->DEBUG_OVERWORLD_TRIGGER_EVENT = FALSE;
-            }
+            input->input_field_1_2 = TRUE;
+            input->DEBUG_OVERWORLD_TRIGGER_EVENT = FALSE;
         }
     }
 
-}
 
-static void QuestLogOverrideJoyVars(struct FieldInput *input, u16 *newKeys, u16 *heldKeys)
-{
-    switch (GetRegisteredQuestLogInput())
-    {
-    case QL_INPUT_OFF:
-        break;
-    case QL_INPUT_UP:
-        *heldKeys = *newKeys = DPAD_UP;
-        break;
-    case QL_INPUT_DOWN:
-        *heldKeys = *newKeys = DPAD_DOWN;
-        break;
-    case QL_INPUT_LEFT:
-        *heldKeys = *newKeys = DPAD_LEFT;
-        break;
-    case QL_INPUT_RIGHT:
-        *heldKeys = *newKeys = DPAD_RIGHT;
-        break;
-    case QL_INPUT_L:
-        *heldKeys = *newKeys = L_BUTTON;
-        break;
-    case QL_INPUT_R:
-        *heldKeys = *newKeys = R_BUTTON;
-        break;
-    case QL_INPUT_START:
-        *heldKeys = *newKeys = START_BUTTON;
-        break;
-    case QL_INPUT_SELECT:
-        *heldKeys = *newKeys = SELECT_BUTTON;
-        break;
-    }
-    ClearQuestLogInputIsDpadFlag();
-    ClearQuestLogInput();
 }
 
 int ProcessPlayerFieldInput(struct FieldInput *input)
@@ -339,14 +291,6 @@ void FieldInput_HandleCancelSignpost(struct FieldInput * input)
             {
                 if (IsMsgBoxWalkawayDisabled() == TRUE)
                     return;
-                if (input->dpadDirection == DIR_NORTH)
-                    RegisterQuestLogInput(QL_INPUT_UP);
-                else if (input->dpadDirection == DIR_SOUTH)
-                    RegisterQuestLogInput(QL_INPUT_DOWN);
-                else if (input->dpadDirection == DIR_WEST)
-                    RegisterQuestLogInput(QL_INPUT_LEFT);
-                else if (input->dpadDirection == DIR_EAST)
-                    RegisterQuestLogInput(QL_INPUT_RIGHT);
                 ScriptContext_SetupScript(EventScript_CancelMessageBox);
                 LockPlayerFieldControls();
             }
@@ -354,20 +298,8 @@ void FieldInput_HandleCancelSignpost(struct FieldInput * input)
             {
                 ScriptContext_SetupScript(EventScript_CancelMessageBox);
                 LockPlayerFieldControls();
-                if (!FuncIsActiveTask(Task_QuestLogPlayback_OpenStartMenu))
-                    CreateTask(Task_QuestLogPlayback_OpenStartMenu, 8);
             }
         }
-    }
-}
-
-static void Task_QuestLogPlayback_OpenStartMenu(u8 taskId)
-{
-    if (!ArePlayerFieldControlsLocked())
-    {
-        PlaySE(SE_WIN_OPEN);
-        ShowStartMenu();
-        DestroyTask(taskId);
     }
 }
 
@@ -445,7 +377,7 @@ const u8 *GetInteractedLinkPlayerScript(struct MapPosition *position, u8 metatil
     else
         objectEventId = GetObjectEventIdByPosition(position->x + gDirectionToVectors[direction].x, position->y + gDirectionToVectors[direction].y, position->elevation);
 
-    if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == OBJ_EVENT_ID_PLAYER)
+    if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == LOCALID_PLAYER)
         return NULL;
 
     for (i = 0; i < MAX_LINK_PLAYERS; i++)
@@ -497,14 +429,14 @@ static const u8 *GetInteractedObjectEventScript(struct MapPosition *position, u8
         break;
     }
 
-    if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == OBJ_EVENT_ID_PLAYER)
+    if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == LOCALID_PLAYER)
     {
         if (MetatileBehavior_IsCounter(metatileBehavior) != TRUE)
             return NULL;
 
         // Look for an object event on the other side of the counter.
         objectEventId = GetObjectEventIdByPosition(position->x + gDirectionToVectors[direction].x, position->y + gDirectionToVectors[direction].y, position->elevation);
-        if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == OBJ_EVENT_ID_PLAYER)
+        if (objectEventId == OBJECT_EVENTS_COUNT || gObjectEvents[objectEventId].localId == LOCALID_PLAYER)
             return NULL;
     }
 
@@ -711,8 +643,6 @@ static bool8 TryStartMiscWalkingScripts(u16 metatileBehavior)
 static bool8 TryStartStepCountScript(u16 metatileBehavior)
 {
     if (InUnionRoom() == TRUE)
-        return FALSE;
-    if (gQuestLogState == QL_STATE_PLAYBACK)
         return FALSE;
 
     UpdateHappinessStepCounter();
@@ -1039,7 +969,7 @@ static void SetupWarp(struct MapHeader *unused, s8 warpEventId, struct MapPositi
 
     warpEvent = &gMapHeader.events->warps[warpEventId];
 
-    if (warpEvent->mapNum == MAP_NUM(DYNAMIC))
+    if (warpEvent->mapNum == MAP_NUM(MAP_DYNAMIC))
     {
         SetWarpDestinationToDynamicWarp(warpEvent->warpId);
     }
@@ -1050,7 +980,7 @@ static void SetupWarp(struct MapHeader *unused, s8 warpEventId, struct MapPositi
         SetWarpDestinationToMapWarp(warpEvent->mapGroup, warpEvent->mapNum, warpEvent->warpId);
         UpdateEscapeWarp(position->x, position->y);
         mapHeader = Overworld_GetMapHeaderByGroupAndId(warpEvent->mapGroup, warpEvent->mapNum);
-        if (mapHeader->events->warps[warpEvent->warpId].mapNum == MAP_NUM(DYNAMIC))
+        if (mapHeader->events->warps[warpEvent->warpId].mapNum == MAP_NUM(MAP_DYNAMIC))
             SetDynamicWarp(mapHeader->events->warps[warpEventId].warpId, gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, warpEventId);
     }
 }
@@ -1156,7 +1086,6 @@ void HandleBoulderActivateVictoryRoadSwitch(u16 x, u16 y)
         {
             if (events[i].x + MAP_OFFSET == x && events[i].y + MAP_OFFSET == y)
             {
-                QuestLog_CutRecording();
                 ScriptContext_SetupScript(events[i].script);
                 LockPlayerFieldControls();
             }

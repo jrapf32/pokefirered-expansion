@@ -119,7 +119,6 @@
 #define GIDDY_MAX_TALES       10
 #define GIDDY_MAX_QUESTIONS    8
 
-#define OPTIONS_BUTTON_MODE_HELP         0
 #define OPTIONS_BUTTON_MODE_LR           1
 #define OPTIONS_BUTTON_MODE_L_EQUALS_A   2
 

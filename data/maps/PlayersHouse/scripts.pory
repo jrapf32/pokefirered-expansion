@@ -1,0 +1,74 @@
+
+mapscripts PlayersHouse_MapScripts {
+}
+
+script PlayersHouse_OnTransition {
+	setrespawn(HEAL_LOCATION_INMALD_TOWN)
+	end
+}
+
+script PlayerHouse_GetRunningShoes{
+	if (flag(FLAG_SYS_B_DASH)) {
+		release
+		end
+	}
+	lockall
+	applymovement(1,PlayerHouse_DadMoveMentToPlayer)
+	waitmovement
+	msgbox(format("I see you are done doing what ever \n you kids do the days! 
+	 \p Professor Tamarind is waiting to give you your Pokémon! 
+	 \p You should really see him!
+	\p Your running shoes came today! 
+	The instructions say to Press B while walking to run in them.
+	 \p Here they are!"))
+	 release
+	waitmessage
+	playfanfare(MUS_OBTAIN_KEY_ITEM)
+	msgbox(format("Got the running shoes!"))
+	release
+	setflag(FLAG_SYS_B_DASH)
+	waitmessage
+	applymovement(1,PlayerHouse_DadMoveBackFromPlayer)
+	waitmovement
+	releaseall
+
+}
+
+movement PlayerHouse_DadMoveMentToPlayer {
+	face_down
+	walk_down
+	face_left
+	walk_left
+}
+
+movement PlayerHouse_DadMoveBackFromPlayer {
+	face_right
+	walk_right
+	face_up
+	walk_up
+	face_right
+
+}
+
+script PlayerHouse_TalkToDad {
+	lockall
+	face_player
+	if (flag(FLAG_SYS_POKEMON_GET)) {
+		msgbox("That's a nice Pokémon! \p You look tired let \n me heal you up!")
+		waitmessage
+		fadescreen(1)
+		waitmessage
+		playfanfare(MUS_HEAL)
+		waitfanfare
+		special(HealPlayerParty)
+		fadescreen(0)
+		waitmessage
+		
+		
+	}
+	else {
+		msgbox("What are you waiting for? \pGet a new Pokémon!")
+	}
+	releaseall
+	face_left
+}

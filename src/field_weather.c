@@ -13,8 +13,7 @@
 #include "constants/weather.h"
 #include "constants/songs.h"
 
-#include "quest_log.h"
-#include "constants/quest_log.h"
+
 
 #define DROUGHT_COLOR_INDEX(color) ((((color) >> 1) & 0xF) | (((color) >> 2) & 0xF0) | (((color) >> 3) & 0xF00))
 
@@ -781,7 +780,7 @@ void FadeSelectedPals(u8 mode, s8 delay, u32 selectedPalettes)
         {
             gWeatherPtr->fadeScreenCounter = 0; // Triggers gamma-shift-based fade-in
         }
-        else if (!QL_IS_PLAYBACK_STATE && MapHasNaturalLight(gMapHeader.mapType))
+        else if (MapHasNaturalLight(gMapHeader.mapType))
         {
             UpdateAltBgPalettes(selectedPalettes & PALETTES_BG);
             BeginTimeOfDayPaletteFade(selectedPalettes, delay, 16, 0, &gTimeBlend.startBlend, &gTimeBlend.endBlend, gTimeBlend.weight, fadeColor);

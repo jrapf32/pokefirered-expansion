@@ -21,10 +21,8 @@ void LoadUserWindowBorderGfx_(u8 windowId, u16 tileStart, u8 palette);
 void LoadStdWindowGfxOnBg(u8 bgId, u16 tileStart, u8 palette);
 void DrawTextBorderOuter(u8 windowId, u16 tileStart, u8 palette);
 void DrawTextBorderInner(u8 windowId, u16 tileNum, u8 palNum);
-void LoadHelpMessageWindowGfx(u8 windowId, u16 destOffset, u8 palIdx);
 void LoadSignBoxGfx(u8 windowId, u16 destOffset, u8 palIdx);
 void LoadDexNavWindowGfx(u8 windowId, u16 destOffset, u8 palOffset);
 void LoadStdWindowTiles(u8 windowId, u16 destOffset);
-void LoadQuestLogWindowTiles(u8 windowId, u16 destOffset);
 
 #endif // GUARD_TEXT_WINDOW_H

@@ -1,7 +1,7 @@
 #include "global.h"
 #include "script.h"
 #include "event_data.h"
-#include "quest_log.h"
+
 #include "mystery_gift.h"
 #include "random.h"
 #include "trainer_see.h"
@@ -34,8 +34,6 @@ static struct ScriptContext sImmediateScriptContext;
 static bool8 sLockFieldControls;
 static u8 sMsgBoxWalkawayDisabled;
 static u8 sMsgBoxIsCancelable;
-static u8 sQuestLogInput;
-static u8 sQuestLogInputIsDpad;
 static u8 sMsgIsSignpost;
 
 extern ScrCmdFunc gScriptCmdTable[];
@@ -218,38 +216,6 @@ bool8 ArePlayerFieldControlsLocked(void)
     return sLockFieldControls;
 }
 
-void SetQuestLogInputIsDpadFlag(void)
-{
-    sQuestLogInputIsDpad = TRUE;
-}
-
-void ClearQuestLogInputIsDpadFlag(void)
-{
-    sQuestLogInputIsDpad = FALSE;
-}
-
-bool8 IsQuestLogInputDpad(void)
-{
-    if(sQuestLogInputIsDpad == TRUE)
-        return TRUE;
-    else
-        return FALSE;
-}
-
-void RegisterQuestLogInput(u8 var)
-{
-    sQuestLogInput = var;
-}
-
-void ClearQuestLogInput(void)
-{
-    sQuestLogInput = 0;
-}
-
-u8 GetRegisteredQuestLogInput(void)
-{
-    return sQuestLogInput;
-}
 
 void DisableMsgBoxWalkaway(void)
 {
@@ -357,7 +323,6 @@ void ScriptContext_SetupScript(const u8 *ptr)
 {
     ClearMsgBoxCancelableState();
     EnableMsgBoxWalkaway();
-    ClearQuestLogInputIsDpadFlag();
 
     InitScriptContext(&sGlobalScriptContext, gScriptCmdTable, gScriptCmdTableEnd);
     SetupBytecodeScript(&sGlobalScriptContext, ptr);
@@ -473,8 +438,6 @@ bool8 TryRunOnFrameMapScript(void)
 {
     u8 *ptr;
 
-    if (gQuestLogState == QL_STATE_PLAYBACK_LAST)
-        return FALSE;
 
     ptr = MapHeaderCheckScriptTable(MAP_SCRIPT_ON_FRAME_TABLE);
 
@@ -564,9 +527,9 @@ bool32 ValidateRamScript(void)
     struct RamScriptData *scriptData = &gSaveBlock1Ptr->ramScript.data;
     if (scriptData->magic != RAM_SCRIPT_MAGIC)
         return FALSE;
-    if (scriptData->mapGroup != MAP_GROUP(UNDEFINED))
+    if (scriptData->mapGroup != MAP_GROUP(MAP_UNDEFINED))
         return FALSE;
-    if (scriptData->mapNum != MAP_NUM(UNDEFINED))
+    if (scriptData->mapNum != MAP_NUM(MAP_UNDEFINED))
         return FALSE;
     if (scriptData->objectId != 0xFF)
         return FALSE;
@@ -586,9 +549,9 @@ u8 *GetSavedRamScriptIfValid(void)
         return NULL;
     if (scriptData->magic != RAM_SCRIPT_MAGIC)
         return NULL;
-    if (scriptData->mapGroup != MAP_GROUP(UNDEFINED))
+    if (scriptData->mapGroup != MAP_GROUP(MAP_UNDEFINED))
         return NULL;
-    if (scriptData->mapNum != MAP_NUM(UNDEFINED))
+    if (scriptData->mapNum != MAP_NUM(MAP_UNDEFINED))
         return NULL;
     if (scriptData->objectId != 0xFF)
         return NULL;
@@ -611,7 +574,7 @@ void InitRamScript_NoObjectEvent(u8 *script, u16 scriptSize)
 #if FREE_MYSTERY_EVENT_BUFFERS == FALSE
     if (scriptSize > sizeof(gSaveBlock1Ptr->ramScript.data.script))
         scriptSize = sizeof(gSaveBlock1Ptr->ramScript.data.script);
-    InitRamScript(script, scriptSize, MAP_GROUP(UNDEFINED), MAP_NUM(UNDEFINED), 0xFF);
+    InitRamScript(script, scriptSize, MAP_GROUP(MAP_UNDEFINED), MAP_NUM(MAP_UNDEFINED), 0xFF);
 #endif //FREE_MYSTERY_EVENT_BUFFERS
 }
 

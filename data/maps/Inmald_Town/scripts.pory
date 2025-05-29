@@ -1,0 +1,174 @@
+mapscripts Inmald_Town_MapScripts {
+	MAP_SCRIPT_ON_TRANSITION: PlayersHouse_OnTransition
+	MAP_SCRIPT_ON_TRANSITION: CableClub_OnResume
+}
+
+text Whitot_Town_TechGuyText {
+	"Technology is Amazing! \n"
+	"Anyone can create a game now!"
+}
+
+script Whitot_Town_TechGuy {
+	lockall
+	faceplayer
+	msgbox(Whitot_Town_TechGuyText)
+	releaseall
+	end
+}
+
+text Whitot_Town_cant_go_out_text {
+	format("Please don't go out. You have no Pokémon.")
+}
+
+script Whitot_Town_Has_No_Pokemon_Blocker_Tile_1 {
+	if (flag(FLAG_SYS_POKEMON_GET) == FALSE) {
+		lockall
+		applymovement(4,Woman_first_tile)
+		waitmovement
+		msgbox(Whitot_Town_cant_go_out_text)
+		releaseall
+		lockall
+		applymovement(4,Woman_first_tile_back)
+		waitmovement
+		applymovement(255, Whitot_Town_Player_walk_up)
+		waitmovement
+		releaseall
+	}
+	else {
+		releaseall
+	}
+	end
+}
+
+script Whitot_Town_Has_No_Pokemon_Blocker_Tile_2 {
+	if (flag(FLAG_SYS_POKEMON_GET) == FALSE) {
+		lockall
+		applymovement(4,Woman_second_tile)
+		waitmovement
+		msgbox(Whitot_Town_cant_go_out_text)
+		releaseall
+		lockall
+		applymovement(4,Woman_second_tile_back)
+		
+		waitmovement
+		
+		applymovement(255, Whitot_Town_Player_walk_up)
+		waitmovement
+		releaseall
+	}
+	else {
+		releaseall
+	}
+	end
+}
+
+script Whitot_Town_Has_No_Pokemon_Blocker_Tile_3 {
+	if (flag(FLAG_SYS_POKEMON_GET) == FALSE) {
+		lockall
+		applymovement(4,Woman_third_tile)
+		waitmovement
+		msgbox(Whitot_Town_cant_go_out_text)
+		releaseall
+		lockall
+		applymovement(4,Woman_third_tile_back)
+		waitmovement
+
+		applymovement(255, Whitot_Town_Player_walk_up)
+		waitmovement
+		releaseall
+	}
+	else {
+		releaseall
+	}
+	end
+}
+
+script Whitot_Town_Has_No_Pokemon_Blocker_Tile_4 {
+	if (flag(FLAG_SYS_POKEMON_GET) == FALSE) {
+		lockall
+		applymovement(4,Woman_fourth_tile)
+		waitmovement
+		msgbox(Whitot_Town_cant_go_out_text)
+		releaseall
+		lockall
+		applymovement(4,Woman_fourth_tile_back)
+		waitmovement
+		
+		applymovement(255, Whitot_Town_Player_walk_up)
+		waitmovement
+		releaseall
+		lockall
+	}
+	else {
+		releaseall
+	}
+	end
+}
+
+
+
+movement Whitot_Town_Player_walk_up {
+	face_up
+	walk_up
+}
+
+movement Woman_first_tile {
+	face_left
+	walk_left
+	face_down
+}
+
+movement Woman_second_tile {
+	face_left
+	walk_left * 2
+	face_down
+}
+
+movement Woman_third_tile {
+	face_left
+	walk_left * 3
+	face_down
+}
+
+movement Woman_fourth_tile {
+	face_left
+	walk_left * 4
+	face_down
+}
+
+movement Woman_first_tile_back {
+	face_right
+	walk_right
+	face_down
+}
+
+movement Woman_second_tile_back {
+	face_right
+	walk_right * 2
+	face_down
+}
+
+movement Woman_third_tile_back {
+	face_right
+	walk_right * 3
+	face_down
+}
+
+movement Woman_fourth_tile_back {
+	face_right
+	walk_right * 4
+	face_down
+}
+
+
+script Whitot_Town_Karen {
+	faceplayer
+	lock
+	
+	msgbox(format("I like to protect little kids! \n Why don't you meet with the Professor"))
+	msgbox("in his lab?")
+	release
+	face_left
+	
+	end
+}

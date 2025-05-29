@@ -9,7 +9,7 @@
 #include "field_player_avatar.h"
 #include "field_specials.h"
 #include "graphics.h"
-#include "help_system.h"
+
 #include "menu.h"
 #include "overworld.h"
 #include "naming_screen.h"
@@ -551,8 +551,6 @@ static void CreateNamingScreenTask(void)
 {
     CreateTask(Task_NamingScreen, 2);
     SetMainCallback2(CB2_NamingScreen);
-    BackupHelpContext();
-    SetHelpContext(HELPCONTEXT_NAMING_SCREEN);
 }
 
 static void Task_NamingScreen(u8 taskId)
@@ -715,7 +713,6 @@ static bool8 MainState_Exit(void)
         DestroyTask(FindTaskIdByFunc(Task_NamingScreen));
         FreeAllWindowBuffers();
         FREE_AND_SET_NULL(sNamingScreen);
-        RestoreHelpContext();
     }
     return FALSE;
 }

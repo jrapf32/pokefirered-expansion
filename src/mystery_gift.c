@@ -12,7 +12,7 @@
 #include "new_game.h"
 #include "wonder_news.h"
 #include "mystery_gift_menu.h"
-#include "help_system.h"
+
 #include "mystery_gift.h"
 #include "strings.h"
 

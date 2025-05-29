@@ -27,6 +27,7 @@
   ],
   "object_events": [
     {
+      "local_id": "LOCALID_ONE_ISLAND_BILL",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_BILL",
       "x": 12,
@@ -99,9 +100,7 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

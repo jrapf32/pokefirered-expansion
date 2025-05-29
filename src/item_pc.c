@@ -3,7 +3,7 @@
 #include "data.h"
 #include "decompress.h"
 #include "graphics.h"
-#include "help_system.h"
+
 #include "item.h"
 #include "item_menu.h"
 #include "item_icon.h"
@@ -22,7 +22,6 @@
 #include "task.h"
 #include "text_window.h"
 #include "constants/items.h"
-#include "constants/quest_log.h"
 #include "constants/songs.h"
 
 struct ItemPcResources
@@ -356,7 +355,6 @@ static bool8 ItemPc_DoGfxSetup(void)
         gMain.state++;
         break;
     case 17:
-        SetHelpContext(HELPCONTEXT_PLAYERS_PC_ITEMS);
         gMain.state++;
         break;
     case 18:
@@ -897,7 +895,6 @@ static void ItemPc_DoWithdraw(u8 taskId)
 
     if (AddBagItem(itemId, data[8]) == TRUE)
     {
-        ItemUse_SetQuestLogEvent(QL_EVENT_WITHDREW_ITEM_PC, NULL, itemId, 0xFFFF);
         CopyItemName(itemId, gStringVar1);
         ConvertIntToDecimalStringN(gStringVar2, data[8], STR_CONV_MODE_LEFT_ALIGN, 3);
         StringExpandPlaceholders(gStringVar4, gText_WithdrewQuantItem);

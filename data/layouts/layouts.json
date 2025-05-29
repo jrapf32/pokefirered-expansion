@@ -4380,6 +4380,78 @@
       "secondary_tileset": "gTileset_MtEmber",
       "border_filepath": "data/layouts/OneIsland_KindleRoad_EmberSpa/border.bin",
       "blockdata_filepath": "data/layouts/OneIsland_KindleRoad_EmberSpa/map.bin"
+    },
+    {
+      "id": "LAYOUT_INMALD_TOWN",
+      "name": "Inmald_Town_Layout",
+      "width": 25,
+      "height": 25,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_PalletTown",
+      "border_filepath": "data/layouts/Inmald_Town/border.bin",
+      "blockdata_filepath": "data/layouts/Inmald_Town/map.bin"
+    },
+    {
+      "id": "LAYOUT_PLAYERS_HOUSE",
+      "name": "PlayersHouse_Layout",
+      "width": 13,
+      "height": 10,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_HoennBuilding",
+      "border_filepath": "data/layouts/PlayersHouse/border.bin",
+      "blockdata_filepath": "data/layouts/PlayersHouse/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROUTE_1",
+      "name": "route_1_Layout",
+      "width": 12,
+      "height": 25,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_ViridianCity",
+      "border_filepath": "data/layouts/route_1/border.bin",
+      "blockdata_filepath": "data/layouts/route_1/map.bin"
+    },
+    {
+      "id": "LAYOUT_ORNKI_TOWN",
+      "name": "Ornki_Town_Layout",
+      "width": 16,
+      "height": 15,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_PalletTown",
+      "border_filepath": "data/layouts/Ornki_Town/border.bin",
+      "blockdata_filepath": "data/layouts/Ornki_Town/map.bin"
+    },
+    {
+      "id": "LAYOUT_WHITOT_LAB",
+      "name": "Whitot_Lab_Layout",
+      "width": 8,
+      "height": 11,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_Building",
+      "secondary_tileset": "gTileset_Lab",
+      "border_filepath": "data/layouts/Whitot_Lab/border.bin",
+      "blockdata_filepath": "data/layouts/Whitot_Lab/map.bin"
+    },
+    {
+      "id": "LAYOUT_ROUTE_2",
+      "name": "route_2_Layout",
+      "width": 36,
+      "height": 17,
+      "border_width": 2,
+      "border_height": 2,
+      "primary_tileset": "gTileset_General",
+      "secondary_tileset": "gTileset_SaffronCity",
+      "border_filepath": "data/layouts/route_2/border.bin",
+      "blockdata_filepath": "data/layouts/route_2/map.bin"
     }
   ]
 }

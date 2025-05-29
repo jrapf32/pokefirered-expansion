@@ -21,7 +21,7 @@
 #include "overworld.h"
 #include "party_menu.h"
 #include "pokeball.h"
-#include "quest_log.h"
+
 #include "random.h"
 #include "script.h"
 #include "trainer_see.h"
@@ -110,7 +110,6 @@ static bool8 MovementType_Buried_Callback(struct ObjectEvent *, struct Sprite *)
 static u8 MovementType_RaiseHandAndStop_Callback(struct ObjectEvent *, struct Sprite *);
 static u8 MovementType_RaiseHandAndJump_Callback(struct ObjectEvent *, struct Sprite *);
 static u8 MovementType_RaiseHandAndSwim_Callback(struct ObjectEvent *, struct Sprite *);
-static void QuestLogObjectEventExecHeldMovementAction(struct ObjectEvent *, struct Sprite *);
 static void VirtualObject_UpdateAnim(struct Sprite *sprite);
 static u32 LoadDynamicFollowerPalette(u32 species, bool32 shiny, bool32 female);
 static void CopyObjectGraphicsInfoToSpriteTemplate_WithMovementType(u16 graphicsId, u16 movementType, struct SpriteTemplate *spriteTemplate, const struct SubspriteTable **subspriteTables);
@@ -1320,9 +1319,9 @@ static const u8 sPlayerDirectionToCopyDirection[][4] = {
 static void ClearObjectEvent(struct ObjectEvent *objectEvent)
 {
     *objectEvent = (struct ObjectEvent){};
-    objectEvent->localId = 0xFF;
-    objectEvent->mapNum = MAP_NUM(UNDEFINED);
-    objectEvent->mapGroup = MAP_GROUP(UNDEFINED);
+    objectEvent->localId = LOCALID_PLAYER;
+    objectEvent->mapNum = MAP_NUM(MAP_UNDEFINED);
+    objectEvent->mapGroup = MAP_GROUP(MAP_UNDEFINED);
     objectEvent->movementActionId = MOVEMENT_ACTION_NONE;
 }
 
@@ -1928,10 +1927,7 @@ void CopyObjectGraphicsInfoToSpriteTemplate(u16 graphicsId, void (*callback)(str
     spriteTemplate->images = graphicsInfo->images;
     spriteTemplate->affineAnims = graphicsInfo->affineAnims;
     
-    if (ScriptContext_IsEnabled() != TRUE && QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING)
-        spriteTemplate->callback = QL_UpdateObject;
-    else
-        spriteTemplate->callback = callback;
+    spriteTemplate->callback = callback;
     
     *subspriteTables = graphicsInfo->subspriteTables;
 }
@@ -2182,7 +2178,6 @@ static u32 LoadDynamicFollowerPalette(u32 species, bool32 shiny, bool32 female)
         // Load compressed palette
         LoadSpritePaletteWithTag(palette, species);
         paletteNum = IndexOfSpritePaletteTag(species); // Tag is always present
-        ApplyGlobalFieldPaletteTint(paletteNum);
     }
 
     if (gWeatherPtr->currWeather != WEATHER_FOG_HORIZONTAL) // don't want to weather blend in fog
@@ -3154,7 +3149,6 @@ static u8 LoadSpritePaletteIfTagExists(const struct SpritePalette *spritePalette
     if (paletteNum != 0xFF) // don't load twice; return
         return paletteNum;
     paletteNum = LoadSpritePalette(spritePalette);
-    ApplyGlobalFieldPaletteTint(paletteNum);
     if (paletteNum != 0xFF)
         UpdateSpritePaletteWithWeather(paletteNum, FALSE);
     return paletteNum;
@@ -6736,9 +6730,7 @@ static const u8 sActionIdToCopyableMovement[] = {
 
 bool8 ObjectEventSetHeldMovement(struct ObjectEvent *objectEvent, u8 movementActionId)
 {
-    if (QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING)
-        ObjectEventClearHeldMovementIfActive(objectEvent);
-    else if (ObjectEventIsMovementOverridden(objectEvent))
+    if (ObjectEventIsMovementOverridden(objectEvent))
         return TRUE;
 
     movementActionId = TryUpdateMovementActionOnStairs(objectEvent, movementActionId);
@@ -6826,27 +6818,6 @@ void UpdateObjectEventCurrentMovement(struct ObjectEvent *objectEvent, struct Sp
         ObjectEventExecHeldMovementAction(objectEvent, sprite);
     else if (!objectEvent->frozen)
         while (callback(objectEvent, sprite));
-
-    DoGroundEffects_OnBeginStep(objectEvent, sprite);
-    DoGroundEffects_OnFinishStep(objectEvent, sprite);
-    UpdateObjectEventSpriteAnimPause(objectEvent, sprite);
-    UpdateObjectEventVisibility(objectEvent, sprite);
-    ObjectEventUpdateSubpriority(objectEvent, sprite);
-}
-
-void QL_UpdateObjectEventCurrentMovement(struct ObjectEvent *objectEvent, struct Sprite *sprite)
-{
-    DoGroundEffects_OnSpawn(objectEvent, sprite);
-    TryEnableObjectEventAnim(objectEvent, sprite);
-
-    if (ObjectEventIsHeldMovementActive(objectEvent) && !sprite->animBeginning)
-        QuestLogObjectEventExecHeldMovementAction(objectEvent, sprite);
-    
-    if (MetatileBehavior_IsIce_2(objectEvent->currentMetatileBehavior) == TRUE
-        || MetatileBehavior_IsTrickHouseSlipperyFloor(objectEvent->currentMetatileBehavior) == TRUE)
-        objectEvent->disableAnim = TRUE;
-    else
-        objectEvent->disableAnim = FALSE;
 
     DoGroundEffects_OnBeginStep(objectEvent, sprite);
     DoGroundEffects_OnFinishStep(objectEvent, sprite);
@@ -6954,16 +6925,6 @@ static void ObjectEventExecHeldMovementAction(struct ObjectEvent *objectEvent, s
     }
 }
 
-static void QuestLogObjectEventExecHeldMovementAction(struct ObjectEvent *objectEvent, struct Sprite *sprite)
-{
-    objectEvent->movementActionId = TryUpdateMovementActionOnStairs(objectEvent, objectEvent->movementActionId);
-    if (sMovementActionFuncs[objectEvent->movementActionId][sprite->data[2]](objectEvent, sprite))
-    {
-        objectEvent->heldMovementFinished = TRUE;
-        if (objectEvent->graphicsId == OBJ_EVENT_GFX_PUSHABLE_BOULDER)
-            HandleBoulderFallThroughHole(objectEvent);
-    }
-}
 
 static bool8 ObjectEventExecSingleMovementAction(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
@@ -6982,8 +6943,6 @@ static void ObjectEventSetSingleMovement(struct ObjectEvent *objectEvent, struct
     objectEvent->movementActionId = TryUpdateMovementActionOnStairs(objectEvent, movementActionId);
     sprite->data[2] = 0;
     
-    if (gQuestLogPlaybackState == QL_PLAYBACK_STATE_RECORDING)
-        QuestLogRecordNPCStep(objectEvent->localId, objectEvent->mapNum, objectEvent->mapGroup, movementActionId);
 }
 
 static void FaceDirection(struct ObjectEvent *objectEvent, struct Sprite *sprite, u8 direction)
@@ -7972,7 +7931,6 @@ static bool8 MovementAction_ExitPokeball_Step0(struct ObjectEvent *objectEvent, 
     ObjectEventSetPokeballGfx(objectEvent);
     objectEvent->graphicsId = graphicsId;
     objectEvent->inanimate = FALSE;
-    ApplyGlobalFieldPaletteTint(sprite->oam.paletteNum);
     return MovementAction_ExitPokeball_Step1(objectEvent, sprite);
 }
 
@@ -8101,7 +8059,6 @@ static bool8 MovementAction_EnterPokeball_Step1(struct ObjectEvent *objectEvent,
         ObjectEventSetPokeballGfx(objectEvent);
         objectEvent->graphicsId = graphicsId;
         objectEvent->inanimate = FALSE;
-        ApplyGlobalFieldPaletteTint(sprite->oam.paletteNum);
     }
     return FALSE;
 }
@@ -8758,7 +8715,7 @@ static bool8 MovementAction_FacePlayer_Step0(struct ObjectEvent *objectEvent, st
 {
     u8 playerObjectId;
 
-    if (!TryGetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0, &playerObjectId))
+    if (!TryGetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0, &playerObjectId))
     {
         FaceDirection(objectEvent, sprite, GetDirectionToFace(objectEvent->currentCoords.x, objectEvent->currentCoords.y, gObjectEvents[playerObjectId].currentCoords.x, gObjectEvents[playerObjectId].currentCoords.y));
     }
@@ -8770,7 +8727,7 @@ static bool8 MovementAction_FaceAwayPlayer_Step0(struct ObjectEvent *objectEvent
 {
     u8 playerObjectId;
 
-    if (!TryGetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0, &playerObjectId))
+    if (!TryGetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0, &playerObjectId))
     {
         FaceDirection(objectEvent, sprite, GetOppositeDirection(GetDirectionToFace(objectEvent->currentCoords.x, objectEvent->currentCoords.y, gObjectEvents[playerObjectId].currentCoords.x, gObjectEvents[playerObjectId].currentCoords.y)));
     }
@@ -9989,7 +9946,7 @@ static void CalcWhetherObjectIsOffscreen(struct ObjectEvent *objectEvent, struct
     u16 x, y;
     u16 x2, y2;
     const struct ObjectEventGraphicsInfo *graphicsInfo;
-    s16 var;
+    s16 minX;
 
     objectEvent->offScreen = FALSE;
     graphicsInfo = GetObjectEventGraphicsInfo(objectEvent->graphicsId);
@@ -10006,21 +9963,21 @@ static void CalcWhetherObjectIsOffscreen(struct ObjectEvent *objectEvent, struct
     x2 = graphicsInfo->width + (s16)x;
     y2 = graphicsInfo->height + (s16)y;
     
-    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(SSANNE_EXTERIOR)
-         && gSaveBlock1Ptr->location.mapNum == MAP_NUM(SSANNE_EXTERIOR)
-         && objectEvent->localId == 1)
+    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SSANNE_EXTERIOR)
+    && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SSANNE_EXTERIOR)
+    && objectEvent->localId == LOCALID_SS_ANNE)
     {
-        var = -32;
+        minX = -32;
     }
     else
     {
-        var = -16;
+        minX = -16;
     }
-    if ((s16)x >= 256 || (s16)x2 < var)
+    if ((s16)x >= (DISPLAY_WIDTH + 16) || (s16)x2 < minX)
     {
         objectEvent->offScreen = TRUE;
     }
-    if ((s16)y >= 176 || (s16)y2 < -16)
+    if ((s16)y >= (DISPLAY_HEIGHT + 16) || (s16)y2 < -16)
     {
         objectEvent->offScreen = TRUE;
     }

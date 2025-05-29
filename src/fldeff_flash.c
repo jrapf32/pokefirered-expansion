@@ -240,11 +240,6 @@ static bool8 TryDoMapTransition(void)
     u8 fromType = GetLastUsedWarpMapType();
     u8 toType = GetCurrentMapType();
     u8 i = 0;
-    if (GetLastUsedWarpMapSectionId() != gMapHeader.regionMapSectionId && MapHasPreviewScreen_HandleQLState2(gMapHeader.regionMapSectionId, MPS_TYPE_CAVE) == TRUE)
-    {
-        RunMapPreviewScreen(gMapHeader.regionMapSectionId);
-        return TRUE;
-    }
     for (; sTransitionTypes[i].fromType != 0; i++)
     {
         if (sTransitionTypes[i].fromType == fromType && sTransitionTypes[i].toType == toType)

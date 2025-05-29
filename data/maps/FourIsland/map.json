@@ -13,9 +13,10 @@
   "show_map_name": true,
   "floor_number": 0,
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
-  "connections": 0,
+  "connections": null,
   "object_events": [
     {
+      "local_id": "LOCALID_FOUR_ISLAND_DAYCARE_MAN",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_OLD_MAN_1",
       "x": 16,
@@ -142,6 +143,7 @@
       "flag": "FLAG_HIDE_FOUR_ISLAND_STARDUST"
     },
     {
+      "local_id": "LOCALID_FOUR_ISLAND_RIVAL",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_BLUE",
       "x": 8,
@@ -242,9 +244,7 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

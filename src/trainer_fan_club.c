@@ -338,11 +338,6 @@ static void BufferFanClubTrainerName(u8 whichLinkTrainer, u8 whichNPCTrainer)
 }
 #endif //FREE_LINK_BATTLE_RECORDS
 
-void Special_UpdateTrainerFansAfterLinkBattle(void)
-{
-    UpdateTrainerFansAfterLinkBattle(TRAINER_FAN_CLUB);
-}
-
 static void UpdateTrainerFansAfterLinkBattle(struct TrainerFanClub *fanClub)
 {
     if (VarGet(VAR_MAP_SCENE_SAFFRON_CITY_POKEMON_TRAINER_FAN_CLUB) == 2)

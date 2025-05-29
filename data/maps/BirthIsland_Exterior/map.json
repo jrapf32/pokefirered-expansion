@@ -2,7 +2,7 @@
   "id": "MAP_BIRTH_ISLAND_EXTERIOR",
   "name": "BirthIsland_Exterior",
   "layout": "LAYOUT_BIRTH_ISLAND_EXTERIOR",
-  "music": "0xFFFF",
+  "music": "MUS_NONE",
   "region_map_section": "MAPSEC_BIRTH_ISLAND_FRLG",
   "requires_flash": false,
   "weather": "WEATHER_NONE",
@@ -13,9 +13,10 @@
   "show_map_name": true,
   "floor_number": 0,
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
-  "connections": 0,
+  "connections": null,
   "object_events": [
     {
+      "local_id": "LOCALID_BIRTH_ISLAND_EXTERIOR_ROCK",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_METEORITE",
       "x": 15,
@@ -30,6 +31,7 @@
       "flag": "FLAG_HIDE_BIRTH_ISLAND_METEORITE"
     },
     {
+      "local_id": "LOCALID_BIRTH_ISLAND_DEOXYS",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_VAR_0",
       "x": 15,
@@ -53,10 +55,6 @@
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [
-
-  ],
-  "bg_events": [
-
-  ]
+  "coord_events": [],
+  "bg_events": []
 }

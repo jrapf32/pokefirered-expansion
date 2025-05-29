@@ -10,7 +10,6 @@ struct FieldMoveInfo {
     u8 partyMessageId;
     const u8* description;
     bool32 (*setUpFunc)(void);
-    const u8* questLogText;
 };
 
 extern const struct FieldMoveInfo gFieldMovesInfo[];

@@ -3,14 +3,14 @@
 #include "gflib.h"
 
 #include "event_data.h"
-#include "help_system.h"
+
 #include "pokedex.h"
 #include "menu.h"
 #include "rtc.h"
 #include "link.h"
 #include "oak_speech.h"
 #include "overworld.h"
-#include "quest_log.h"
+
 #include "mystery_gift_menu.h"
 #include "save.h"
 #include "scanline_effect.h"
@@ -535,15 +535,17 @@ static void Task_ExecuteMainMenuSelection(u8 taskId)
             StartNewGameScene();
             break;
         case MAIN_MENU_CONTINUE:
+
             gPlttBufferUnfaded[0] = RGB_BLACK;
             gPlttBufferFaded[0] = RGB_BLACK;
             gExitStairsMovementDisabled = FALSE;
             FreeAllWindowBuffers();
-            TryStartQuestLogPlayback(taskId);
+            UpdateLoadedSeason();
+            SetMainCallback2(CB2_ContinueSavedGame);
+            DestroyTask(taskId);
             break;
         case MAIN_MENU_MYSTERYGIFT:
             SetMainCallback2(CB2_InitMysteryGift);
-            HelpSystem_Disable();
             FreeAllWindowBuffers();
             DestroyTask(taskId);
             break;

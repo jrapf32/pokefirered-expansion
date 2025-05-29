@@ -22,7 +22,7 @@
 #include "fieldmap.h"
 #include "fldeff.h"
 #include "heal_location.h"
-#include "help_system.h"
+
 #include "item.h"
 #include "item_icon.h"
 #include "link.h"
@@ -37,8 +37,8 @@
 #include "new_game.h"
 #include "overworld.h"
 #include "play_time.h"
-#include "quest_log.h"
-#include "quest_log_objects.h"
+
+
 #include "random.h"
 #include "renewable_hidden_items.h"
 #include "roamer.h"
@@ -167,9 +167,6 @@ static void SetCameraToTrackGuestPlayer_2(void);
 static void OffsetCameraFocusByLinkPlayerId(void);
 static void SpawnLinkPlayers(void);
 static void CreateLinkPlayerSprites(void);
-static void CB2_LoadMapForQLPlayback(void);
-static void DoLoadMap_QLPlayback(u8 *state);
-static bool32 LoadMap_QLPlayback(u8 *state);
 static bool32 SetUpScrollSceneForCredits(u8 *state, u8 unused);
 static bool8 MapLdr_Credits(void);
 static void CameraCB_CreditsPan(struct CameraObject * camera);
@@ -302,8 +299,6 @@ void Overworld_ResetStateAfterFly(void)
     VarSet(VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE, 0);
     FlagClear(FLAG_SYS_USE_STRENGTH);
     FlagClear(FLAG_SYS_FLASH_ACTIVE);
-    FlagClear(FLAG_SYS_QL_DEPARTED);
-    VarSet(VAR_QL_ENTRANCE, 0);
 }
 
 void Overworld_ResetStateAfterTeleport(void)
@@ -316,8 +311,6 @@ void Overworld_ResetStateAfterTeleport(void)
     VarSet(VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE, 0);
     FlagClear(FLAG_SYS_USE_STRENGTH);
     FlagClear(FLAG_SYS_FLASH_ACTIVE);
-    FlagClear(FLAG_SYS_QL_DEPARTED);
-    VarSet(VAR_QL_ENTRANCE, 0);
 }
 
 void Overworld_ResetStateAfterDigEscRope(void)
@@ -330,8 +323,6 @@ void Overworld_ResetStateAfterDigEscRope(void)
     VarSet(VAR_MAP_SCENE_FUCHSIA_CITY_SAFARI_ZONE_ENTRANCE, 0);
     FlagClear(FLAG_SYS_USE_STRENGTH);
     FlagClear(FLAG_SYS_FLASH_ACTIVE);
-    FlagClear(FLAG_SYS_QL_DEPARTED);
-    VarSet(VAR_QL_ENTRANCE, 0);
 }
 
 #if B_RESET_FLAGS_VARS_AFTER_WHITEOUT  == TRUE
@@ -371,8 +362,6 @@ static void Overworld_ResetStateAfterWhitingOut(void)
     FlagClear(FLAG_SYS_FLASH_ACTIVE);
     if (B_RESET_FLAGS_VARS_AFTER_WHITEOUT == TRUE)
         Overworld_ResetBattleFlagsAndVars();
-    FlagClear(FLAG_SYS_QL_DEPARTED);
-    VarSet(VAR_QL_ENTRANCE, 0);
 }
 
 static void Overworld_ResetStateOnContinue(void)
@@ -522,8 +511,8 @@ static const struct MapLayout *GetMapLayout(void)
 // Routines related to warps
 
 static const struct WarpData sDummyWarpData = {
-    .mapGroup = MAP_GROUP(UNDEFINED),
-    .mapNum = MAP_NUM(UNDEFINED),
+    .mapGroup = MAP_GROUP(MAP_UNDEFINED),
+    .mapNum = MAP_NUM(MAP_UNDEFINED),
     .warpId = 0xFF,
     .x = -1,
     .y = -1
@@ -548,9 +537,9 @@ static void SetWarpData(struct WarpData *warp, s8 mapGroup, s8 mapNum, s8 warpId
 
 static bool32 IsDummyWarp(struct WarpData *warp)
 {
-    if (warp->mapGroup != (s8)MAP_GROUP(UNDEFINED))
+    if (warp->mapGroup != (s8)MAP_GROUP(MAP_UNDEFINED))
         return FALSE;
-    else if (warp->mapNum != (s8)MAP_NUM(UNDEFINED))
+    else if (warp->mapNum != (s8)MAP_NUM(MAP_UNDEFINED))
         return FALSE;
     else if (warp->warpId != -1)
         return FALSE;
@@ -644,7 +633,7 @@ void SetWarpDestinationToHealLocation(u8 healLocationId)
 {
     const struct HealLocation *warp = GetHealLocation(healLocationId);
     if (warp)
-        SetWarpDestination(warp->group, warp->map, -1, warp->x, warp->y);
+        SetWarpDestination(warp->mapGroup, warp->mapNum, -1, warp->x, warp->y);
 }
 
 void SetWarpDestinationToLastHealLocation(void)
@@ -661,7 +650,7 @@ void SetLastHealLocationWarp(u8 healLocationId)
 {
     const struct HealLocation *healLocation = GetHealLocation(healLocationId);
     if (healLocation)
-        SetWarpData(&gSaveBlock1Ptr->lastHealLocation, healLocation->group, healLocation->map, -1, healLocation->x, healLocation->y);
+        SetWarpData(&gSaveBlock1Ptr->lastHealLocation, healLocation->mapGroup, healLocation->mapNum, -1, healLocation->x, healLocation->y);
 }
 
 void UpdateEscapeWarp(s16 x, s16 y)
@@ -669,7 +658,7 @@ void UpdateEscapeWarp(s16 x, s16 y)
     u8 currMapType = GetCurrentMapType();
     u8 destMapType = GetMapTypeByGroupAndId(sWarpDestination.mapGroup, sWarpDestination.mapNum);
     u8 delta;
-    if (IsMapTypeOutdoors(currMapType) && IsMapTypeOutdoors(destMapType) != TRUE && !(gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(VIRIDIAN_FOREST) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(VIRIDIAN_FOREST)))
+    if (IsMapTypeOutdoors(currMapType) && IsMapTypeOutdoors(destMapType) != TRUE && !(gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_VIRIDIAN_FOREST) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_VIRIDIAN_FOREST)))
     {
         delta = GetPlayerFacingDirection() != DIR_SOUTH;
         SetEscapeWarp(gSaveBlock1Ptr->location.mapGroup, gSaveBlock1Ptr->location.mapNum, -1, x - 7, y - 7 + delta);
@@ -718,7 +707,7 @@ void SetContinueGameWarpToHealLocation(u8 healLocationId)
 {
     const struct HealLocation *warp = GetHealLocation(healLocationId);
     if (warp)
-        SetWarpData(&gSaveBlock1Ptr->continueGameWarp, warp->group, warp->map, -1, warp->x, warp->y);
+        SetWarpData(&gSaveBlock1Ptr->continueGameWarp, warp->mapGroup, warp->mapNum, -1, warp->x, warp->y);
 }
 
 void SetContinueGameWarpToDynamicWarp(int unused)
@@ -799,7 +788,6 @@ void LoadMapFromCameraTransition(u8 mapGroup, u8 mapNum)
     InitSecondaryTilesetAnimation();
     UpdateLocationHistoryForRoamer();
     RoamerMove();
-    QL_ResetDefeatedWildMonRecord();
     DoCurrentWeather();
     ResetFieldTasksArgs();
     RunOnResumeMapScript();
@@ -834,24 +822,9 @@ static void LoadMapFromWarp(bool32 unused)
     TryRegenerateRenewableHiddenItems();
     UpdateLocationHistoryForRoamer();
     RoamerMoveToOtherLocationSet();
-    QL_ResetDefeatedWildMonRecord();
     InitMap();
 }
 
-static void QL_LoadMapNormal(void)
-{
-    LoadCurrentMapData();
-    LoadObjEventTemplatesFromHeader();
-    TrySetMapSaveWarpStatus();
-    DoTimeBasedEvents();
-    SetSavedWeatherFromCurrMapHeader();
-    ChooseAmbientCrySpecies();
-    SetDefaultFlashLevel();
-    QL_ResetDefeatedWildMonRecord();
-    QL_RestoreMapLayoutId();
-    LoadSaveblockMapHeader();
-    InitMap();
-}
 
 // Routines related to the initial player avatar state
 
@@ -923,10 +896,10 @@ bool8 MetatileBehavior_IsSurfableInSeafoamIslands(u16 metatileBehavior)
 {
     if (MetatileBehavior_IsSurfable(metatileBehavior) != TRUE)
         return FALSE;
-    if ((gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(SEAFOAM_ISLANDS_B3F)
-          && gSaveBlock1Ptr->location.mapNum == MAP_NUM(SEAFOAM_ISLANDS_B3F))
-     || (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(SEAFOAM_ISLANDS_B4F)
-          && gSaveBlock1Ptr->location.mapNum == MAP_NUM(SEAFOAM_ISLANDS_B4F)))
+    if ((gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SEAFOAM_ISLANDS_B3F)
+          && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SEAFOAM_ISLANDS_B3F))
+     || (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SEAFOAM_ISLANDS_B4F)
+          && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SEAFOAM_ISLANDS_B4F)))
         return TRUE;
     return FALSE;
 }
@@ -1050,7 +1023,7 @@ void Overworld_PlaySpecialMapMusic(void)
     if (gDisableMapMusicChangeOnMapLoad == MUSIC_DISABLE_KEEP)
         return;
 
-    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(POKEMON_LEAGUE_CHAMPIONS_ROOM) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(POKEMON_LEAGUE_CHAMPIONS_ROOM))
+    if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_POKEMON_LEAGUE_CHAMPIONS_ROOM) && gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_POKEMON_LEAGUE_CHAMPIONS_ROOM))
     {
         PlayerGetDestCoords(&x, &y);
         if (y - 7 < 11 && gMPlayInfo_BGM.songHeader == &mus_victory_gym_leader)
@@ -1414,7 +1387,6 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
 {
     struct FieldInput fieldInput;
 
-    QL_TryRunActions();
     UpdatePlayerAvatarTransitionState();
     FieldClearPlayerInput(&fieldInput);
     FieldGetPlayerInput(&fieldInput, newKeys, heldKeys);
@@ -1423,8 +1395,6 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
     {
         if (ProcessPlayerFieldInput(&fieldInput) == TRUE)
         {
-            if (gQuestLogPlaybackState == QL_PLAYBACK_STATE_RECORDING)
-                QL_RecordFieldInput(&gFieldInputRecord);
             LockPlayerFieldControls();
             DismissMapNamePopup();
         }
@@ -1433,47 +1403,13 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
             player_step(fieldInput.dpadDirection, newKeys, heldKeys);
         }
     }
-    RunQuestLogCB();
-}
-
-static void DoCB1_Overworld_QuestLogPlayback(void)
-{
-    struct FieldInput fieldInput;
-
-    QL_TryRunActions();
-    UpdatePlayerAvatarTransitionState();
-    QL_HandleInput();
-    FieldClearPlayerInput(&fieldInput);
-    fieldInput = gQuestLogFieldInput;
-    FieldInput_HandleCancelSignpost(&fieldInput);
-    if (!ArePlayerFieldControlsLocked())
-    {
-        if (ProcessPlayerFieldInput(&fieldInput) == TRUE)
-        {
-            LockPlayerFieldControls();
-            DismissMapNamePopup();
-        }
-        else
-        {
-            RunQuestLogCB();
-        }
-    }
-    else if (QuestLogScenePlaybackIsEnding() == TRUE)
-    {
-        RunQuestLogCB();
-    }
-    FieldClearPlayerInput(&gQuestLogFieldInput);
 }
 
 void CB1_Overworld(void)
 {
     if (gMain.callback2 == CB2_Overworld)
-    {
-        if (QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING || gQuestLogState == QL_STATE_PLAYBACK)
-            DoCB1_Overworld_QuestLogPlayback();
-        else
-            DoCB1_Overworld(gMain.newKeys, gMain.heldKeys);
-    }
+        DoCB1_Overworld(gMain.newKeys, gMain.heldKeys);
+    
 }
 
 #define TINT_NIGHT Q_8_8(0.456) | Q_8_8(0.456) << 8 | Q_8_8(0.615) << 16
@@ -1565,8 +1501,6 @@ void UpdateAltBgPalettes(u16 palettes)
     const struct Tileset *primary = GetPrimaryTileset(gMapHeader.mapLayout);
     const struct Tileset *secondary = GetSecondaryTileset(gMapHeader.mapLayout);
     u32 i = 1;
-    if (QL_IS_PLAYBACK_STATE)
-        return;
     if (!MapHasNaturalLight(gMapHeader.mapType))
         return;
     palettes &= ~((1 << NUM_PALS_IN_PRIMARY) - 1) | primary->swapPalettes;
@@ -1591,8 +1525,6 @@ void UpdateAltBgPalettes(u16 palettes)
 
 void UpdatePalettesWithTime(u32 palettes)
 {
-    if (QL_IS_PLAYBACK_STATE)
-        return;
     if (MapHasNaturalLight(gMapHeader.mapType))
     {
         u32 i;
@@ -1611,8 +1543,6 @@ void UpdatePalettesWithTime(u32 palettes)
 
 u8 UpdateSpritePaletteWithTime(u8 paletteNum)
 {
-    if (QL_IS_PLAYBACK_STATE)
-        return paletteNum;
     if (MapHasNaturalLight(gMapHeader.mapType))
     {
         if (IS_BLEND_IMMUNE_TAG(GetSpritePaletteTagByPaletteNum(paletteNum)))
@@ -1628,7 +1558,6 @@ static void OverworldBasic(void)
     RunTasks();
     AnimateSprites();
     CameraUpdate();
-    SetQuestLogEvent_Arrived();
     UpdateCameraPanning();
     BuildOamBuffer();
     UpdatePaletteFade();
@@ -1732,7 +1661,6 @@ void CB2_WhiteOut(void)
         gFieldCallback = FieldCB_RushInjuredPokemonToCenter;
         val = 0;
         DoMapLoadLoop(&val);
-        QuestLog_CutRecording();
         SetFieldVBlankCallback();
         SetMainCallback1(CB1_Overworld);
         SetMainCallback2(CB2_Overworld);
@@ -1752,16 +1680,9 @@ void CB2_LoadMap(void)
 static void CB2_LoadMap2(void)
 {
     DoMapLoadLoop(&gMain.state);
-    if (QuestLog_ShouldEndSceneOnMapChange() == TRUE)
-    {
-        QuestLog_AdvancePlayhead_();
-    }
-    else
-    {
-        SetFieldVBlankCallback();
-        SetMainCallback1(CB1_Overworld);
-        SetMainCallback2(CB2_Overworld);
-    }
+    SetFieldVBlankCallback();
+    SetMainCallback1(CB1_Overworld);
+    SetMainCallback2(CB2_Overworld);
 }
 
 void CB2_ReturnToFieldCableClub(void)
@@ -1967,7 +1888,6 @@ static bool32 LoadMapInStepsLink(u8 *state)
         InitObjectEventsLink();
         SpawnLinkPlayers();
         SetCameraToTrackGuestPlayer();
-        SetHelpContextForMap();
         (*state)++;
         break;
     case 4:
@@ -2033,7 +1953,6 @@ static bool32 LoadMapInStepsLocal(u8 *state, bool32 inLink)
         (*state)++;
         break;
     case 1:
-        QuestLog_InitPalettesBackup();
         (*state)++;
         break;
     case 2:
@@ -2041,19 +1960,11 @@ static bool32 LoadMapInStepsLocal(u8 *state, bool32 inLink)
         (*state)++;
         break;
     case 3:
-        if (QuestLog_ShouldEndSceneOnMapChange() == TRUE)
-            return TRUE;
         (*state)++;
         break;
     case 4:
         InitObjectEventsLocal();
         SetCameraToTrackPlayer();
-        if (gQuestLogState != QL_STATE_PLAYBACK)
-        {
-            QuestLog_CheckDepartingIndoorsMap();
-            QuestLog_TryRecordDepartedLocation();
-        }
-        SetHelpContextForMap();
         (*state)++;
         break;
     case 5:
@@ -2089,10 +2000,10 @@ static bool32 LoadMapInStepsLocal(u8 *state, bool32 inLink)
         (*state)++;
         break;
     case 12:
-        if (GetLastUsedWarpMapSectionId() != gMapHeader.regionMapSectionId && MapHasPreviewScreen_HandleQLState2(gMapHeader.regionMapSectionId, MPS_TYPE_FOREST) == TRUE)
+        if (GetLastUsedWarpMapSectionId() != gMapHeader.regionMapSectionId && MapHasPreviewScreen(gMapHeader.regionMapSectionId, MPS_TYPE_FOREST) == TRUE)
         {
-            MapPreview_LoadGfx(gMapHeader.regionMapSectionId);
-            MapPreview_StartForestTransition(gMapHeader.regionMapSectionId);
+           MapPreview_LoadGfx(gMapHeader.regionMapSectionId);
+           MapPreview_StartForestTransition(gMapHeader.regionMapSectionId);
         }
         else if (gMapHeader.showMapName == TRUE)
         {
@@ -2116,7 +2027,6 @@ static bool32 ReturnToFieldLocal(u8 *state)
     {
     case 0:
         InitOverworldBgs();
-        QuestLog_InitPalettesBackup();
         ResumeMap(FALSE);
         ReloadObjectsAndRunReturnToFieldMapScript();
         if (gFieldCallback == FieldCallback_UseFly)
@@ -2131,7 +2041,6 @@ static bool32 ReturnToFieldLocal(u8 *state)
         break;
     case 2:
         InitViewGraphics();
-        SetHelpContextForMap();
         (*state)++;
         break;
     case 3:
@@ -2154,7 +2063,6 @@ static bool32 ReturnToFieldLink(u8 *state)
         (*state)++;
         break;
     case 1:
-        QuestLog_InitPalettesBackup();
         ResumeMap(TRUE);
         (*state)++;
         break;
@@ -2162,7 +2070,6 @@ static bool32 ReturnToFieldLink(u8 *state)
         CreateLinkPlayerSprites();
         ReloadObjectsAndRunReturnToFieldMapScript();
         SetCameraToTrackGuestPlayer_2();
-        SetHelpContextForMap();
         (*state)++;
         break;
     case 3:
@@ -2384,147 +2291,7 @@ static void CreateLinkPlayerSprites(void)
         CreateLinkPlayerSprite(i, gLinkPlayers[i].version);
 }
 
-// Quest Log
 
-void CB2_SetUpOverworldForQLPlaybackWithWarpExit(void)
-{
-    FieldClearVBlankHBlankCallbacks();
-    gGlobalFieldTintMode = QL_TINT_GRAYSCALE;
-    ScriptContext_Init();
-    UnlockPlayerFieldControls();
-    SetMainCallback1(NULL);
-    SetMainCallback2(CB2_DoChangeMap);
-    gMain.savedCallback = CB2_LoadMapForQLPlayback;
-}
-
-void CB2_SetUpOverworldForQLPlayback(void)
-{
-    FieldClearVBlankHBlankCallbacks();
-    gGlobalFieldTintMode = QL_TINT_GRAYSCALE;
-    LoadSaveblockMapHeader();
-    ScriptContext_Init();
-    UnlockPlayerFieldControls();
-    SetMainCallback1(NULL);
-    SetMainCallback2(CB2_LoadMapForQLPlayback);
-}
-
-static void CB2_LoadMapForQLPlayback(void)
-{
-    DoLoadMap_QLPlayback(&gMain.state);
-    SetFieldVBlankCallback();
-    SetMainCallback1(CB1_Overworld);
-    SetMainCallback2(CB2_Overworld);
-}
-
-static void DoLoadMap_QLPlayback(u8 *state)
-{
-    while (!LoadMap_QLPlayback(state))
-        ;
-}
-
-static bool32 LoadMap_QLPlayback(u8 *state)
-{
-    switch (*state)
-    {
-    case 0:
-        InitOverworldBgs();
-        FieldClearVBlankHBlankCallbacks();
-        QuestLog_InitPalettesBackup();
-        QL_CopySaveState();
-        QL_ResetPartyAndPC();
-        if (GetQuestLogStartType() == QL_START_WARP)
-        {
-            gExitStairsMovementDisabled = FALSE;
-            LoadMapFromWarp(FALSE);
-        }
-        else
-        {
-            gExitStairsMovementDisabled = TRUE;
-            QL_LoadMapNormal();
-        }
-        (*state)++;
-        break;
-    case 1:
-        QL_InitSceneObjectsAndActions();
-        (*state)++;
-        break;
-    case 2:
-        ResumeMap(FALSE);
-        (*state)++;
-        break;
-    case 3:
-        ReloadObjectsAndRunReturnToFieldMapScript();
-        SetCameraToTrackPlayer();
-        (*state)++;
-        break;
-    case 4:
-        InitCurrentFlashLevelScanlineEffect();
-        InitOverworldGraphicsRegisters();
-        (*state)++;
-        break;
-    case 5:
-        move_tilemap_camera_to_upper_left_corner();
-        (*state)++;
-        break;
-    case 6:
-        CopyPrimaryTilesetToVram(gMapHeader.mapLayout);
-        (*state)++;
-        break;
-    case 7:
-        CopySecondaryTilesetToVram(gMapHeader.mapLayout);
-        (*state)++;
-        break;
-    case 8:
-        if (FreeTempTileDataBuffersIfPossible() != TRUE)
-        {
-            LoadMapTilesetPalettes(gMapHeader.mapLayout);
-            (*state)++;
-        }
-        break;
-    case 9:
-        DrawWholeMapView();
-        (*state)++;
-        break;
-    case 10:
-        InitTilesetAnimations();
-        QL_TryStopSurfing();
-        (*state)++;
-        break;
-    default:
-        if (RunFieldCallback())
-            return TRUE;
-        break;
-    }
-    return FALSE;
-}
-
-void CB2_EnterFieldFromQuestLog(void)
-{
-    FieldClearVBlankHBlankCallbacks();
-    StopMapMusic();
-    gGlobalFieldTintMode = QL_TINT_BACKUP_GRAYSCALE;
-    ResetSafariZoneFlag_();
-    LoadSaveblockMapHeader();
-    LoadSaveblockObjEventScripts();
-    UnfreezeObjectEvents();
-    Overworld_ResetStateOnContinue();
-    InitMapFromSavedGame();
-    PlayTimeCounter_Start();
-    ScriptContext_Init();
-    gExitStairsMovementDisabled = TRUE;
-    if (UseContinueGameWarp() == TRUE)
-    {
-        ClearContinueGameWarpStatus();
-        SetWarpDestinationToContinueGameWarp();
-        WarpIntoMap();
-        SetMainCallback2(CB2_LoadMap);
-    }
-    else
-    {
-        SetMainCallback1(CB1_Overworld);
-        CB2_ReturnToField();
-    }
-}
 
 // Credits
 
@@ -2553,10 +2320,9 @@ static bool8 FieldCB2_Credits_WaitFade(void)
         return FALSE;
 }
 
-bool32 Overworld_DoScrollSceneForCredits(u8 *state_p, const struct CreditsOverworldCmd * script, u8 tintMode)
+bool32 Overworld_DoScrollSceneForCredits(u8 *state_p, const struct CreditsOverworldCmd * script)
 {
     sCreditsOverworld_Script = script;
-    gGlobalFieldTintMode = tintMode;
     return SetUpScrollSceneForCredits(state_p, 0);
 }
 

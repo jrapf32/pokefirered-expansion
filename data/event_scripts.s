@@ -37,11 +37,9 @@
 #include "constants/weather.h"
 #include "constants/union_room.h"
 #include "constants/trade.h"
-#include "constants/quest_log.h"
 #include "constants/daycare.h"
 #include "constants/easy_chat.h"
 #include "constants/trainer_card.h"
-#include "constants/help_system.h"
 #include "constants/trainer_fan_club.h"
 #include "constants/mystery_gift.h"
 	.include "asm/macros.inc"
@@ -1101,7 +1099,6 @@ EventScript_OutOfCenterPartyHeal::
 EventScript_WallTownMap::
 	lockall
 	msgbox Text_ATownMap
-	goto_if_questlog EventScript_ReleaseEnd
 	fadescreen FADE_TO_BLACK
 	special ShowTownMap
 	waitstate
@@ -1344,7 +1341,6 @@ Text_TestMsg::
 	.include "data/text/sign_lady.inc"
 	.include "data/text/trainer_card.inc"
 	.include "data/scripts/trainer_card.inc"
-	.include "data/text/help_system.inc"
 	.include "data/scripts/cable_club.inc"
 	.include "data/scripts/field_moves.inc"
 	.include "data/scripts/item_ball_scripts.inc"
@@ -1369,3 +1365,21 @@ Text_TestMsg::
 	.include "data/text/pokedude.inc"
 	.include "data/scripts/follower.inc"
 	.include "data/scripts/dexnav.inc"
+
+	.include "data/maps/Inmald_Town/scripts.inc"
+	.include "data/maps/Inmald_Town/text.inc"
+
+	.include "data/maps/PlayersHouse/scripts.inc"
+	.include "data/maps/PlayersHouse/text.inc"
+
+	.include "data/maps/route_1/scripts.inc"
+	.include "data/maps/route_1/text.inc"
+
+	.include "data/maps/Ornki_Town/scripts.inc"
+	.include "data/maps/Ornki_Town/text.inc"
+
+	.include "data/maps/Whitot_Lab/scripts.inc"
+	.include "data/maps/Whitot_Lab/text.inc"
+
+	.include "data/maps/route_2/scripts.inc"
+	.include "data/maps/route_2/text.inc"

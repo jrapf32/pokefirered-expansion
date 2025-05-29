@@ -20,8 +20,7 @@
 #include "fieldmap.h"
 #include "fldeff.h"
 #include "graphics.h"
-#include "help_message.h"
-#include "help_system.h"
+
 #include "item.h"
 #include "item_menu.h"
 #include "item_use.h"
@@ -44,7 +43,7 @@
 #include "pokemon_special_anim.h"
 #include "pokemon_storage_system.h"
 #include "pokemon_summary_screen.h"
-#include "quest_log.h"
+
 #include "region_map.h"
 #include "reshow_battle_screen.h"
 #include "scanline_effect.h"
@@ -70,7 +69,6 @@
 #include "constants/maps.h"
 #include "constants/moves.h"
 #include "constants/pokemon.h"
-#include "constants/quest_log.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
 
@@ -269,7 +267,6 @@ static void UpdatePartySelectionDoubleLayout(s8 *slotPtr, s8 movementDir);
 static s8 GetNewSlotDoubleLayout(s8 slotId, s8 movementDir);
 static void Task_PrintAndWaitForText(u8 taskId);
 static void PartyMenuPrintText(const u8 *text);
-static void SetSwappedHeldItemQuestLogEvent(struct Pokemon *mon, u16 item, u16 item2);
 static bool16 IsMonAllowedInPokemonJump(struct Pokemon *mon);
 static bool16 IsMonAllowedInDodrioBerryPicking(struct Pokemon *mon);
 static void Task_CancelParticipationYesNo(u8 taskId);
@@ -399,8 +396,6 @@ static void PartyMenuHandlePokedudeCancel(void);
 static void PartyMenu_Oak_PrintText(u8 windowId, const u8 *str);
 static u8 FirstBattleEnterParty_CreateWindowAndMsg1Printer(void);
 static void FirstBattleEnterParty_DestroyVoiceoverWindow(u8 windowId);
-static void SetSwitchedPartyOrderQuestLogEvent(void);
-static void SetUsedFieldMoveQuestLogEvent(struct Pokemon *mon, u8 fieldMove);
 static void CB2_DoUseItemAnim(void);
 static void CB2_UseItem(void);
 static void ItemUseCB_RestorePP(u8 taskId, TaskFunc func);
@@ -427,7 +422,6 @@ EWRAM_DATA u8 gSelectedMonPartyId = 0;
 EWRAM_DATA MainCallback gPostMenuFieldCallback = NULL;
 static EWRAM_DATA u16 *sSlot1TilemapBuffer = NULL; // for switching party slots
 static EWRAM_DATA u16 *sSlot2TilemapBuffer = NULL;
-static EWRAM_DATA struct Pokemon *sSacredAshQuestLogMonBackup = NULL;
 EWRAM_DATA u8 gSelectedOrderFromParty[MAX_FRONTIER_PARTY_SIZE] = {0};
 static EWRAM_DATA u16 sPartyMenuItemId = ITEM_NONE;
 ALIGNED(4) EWRAM_DATA u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2] = {0}; // bits 0-3 are the current pos of Slot 1, 4-7 are Slot 2, and so on
@@ -629,7 +623,6 @@ static bool8 ShowPartyMenu(void)
         ++gMain.state;
         break;
     case 19:
-        SetHelpContext(HELPCONTEXT_PARTY_MENU);
         ++gMain.state;
         break;
     case 20:
@@ -736,7 +729,6 @@ static bool8 ReloadPartyMenu(void)
         gMain.state++;
         break;
     case 17:
-        SetHelpContext(HELPCONTEXT_PARTY_MENU);
         ++gMain.state;
         break;
     case 18:
@@ -1801,12 +1793,6 @@ static void Task_ReturnToChooseMonAfterText(u8 taskId)
 
 static void DisplayGaveHeldItemMessage(struct Pokemon *mon, u16 item, bool8 keepOpen, bool8 fromBagMenu)
 {
-    if (!fromBagMenu) // Used Give option from party menu
-        ItemUse_SetQuestLogEvent(QL_EVENT_GAVE_HELD_ITEM, mon, item, 0xFFFF);
-    // else if (gPartyMenu.action == PARTY_ACTION_GIVE_PC_ITEM)
-    //     ItemUse_SetQuestLogEvent(QL_EVENT_GAVE_HELD_ITEM_PC, mon, item, 0xFFFF);
-    else
-        ItemUse_SetQuestLogEvent(QL_EVENT_GAVE_HELD_ITEM_BAG, mon, item, 0xFFFF);
     GetMonNickname(mon, gStringVar1);
     CopyItemName(item, gStringVar2);
     StringExpandPlaceholders(gStringVar4, gText_PkmnWasGivenItem);
@@ -1816,7 +1802,6 @@ static void DisplayGaveHeldItemMessage(struct Pokemon *mon, u16 item, bool8 keep
 
 static void DisplayTookHeldItemMessage(struct Pokemon *mon, u16 item, bool8 keepOpen)
 {
-    ItemUse_SetQuestLogEvent(QL_EVENT_TOOK_HELD_ITEM, mon, item, 0xFFFF);
     GetMonNickname(mon, gStringVar1);
     CopyItemName(item, gStringVar2);
     StringExpandPlaceholders(gStringVar4, gText_ReceivedItemFromPkmn);
@@ -1835,7 +1820,6 @@ static void DisplayAlreadyHoldingItemSwitchMessage(struct Pokemon *mon, u16 item
 
 static void DisplaySwitchedHeldItemMessage(u16 item, u16 item2, bool8 keepOpen)
 {
-    SetSwappedHeldItemQuestLogEvent(&gPlayerParty[gPartyMenu.slotId], item2, item);
     CopyItemName(item, gStringVar1);
     CopyItemName(item2, gStringVar2);
     StringExpandPlaceholders(gStringVar4, gText_SwitchedPkmnItem);
@@ -2831,7 +2815,6 @@ static void ToggleFieldMoveDescriptionWindow(u8 action)
     {
         if (ptr->windowId[2] == WINDOW_NONE)
             ptr->windowId[2] = AddWindow(&sFieldMoveDescriptionWindowTemplate);
-        DrawHelpMessageWindowTilesById(ptr->windowId[2]);
         letterSpacing = GetFontAttribute(FONT_NORMAL, FONTATTR_LETTER_SPACING);
         AddTextPrinterParameterized4(ptr->windowId[2], FONT_NORMAL, 3, 6, letterSpacing, 0, sFontColorTable[5], 0, gFieldMovesInfo[action - CURSOR_OPTION_FIELD_MOVES].description);
         PutWindowTilemap(ptr->windowId[2]);
@@ -3351,7 +3334,7 @@ static void SwitchSelectedMons(u8 taskId)
     else
     {
         // Initialize switching party mons slide animation
-        SetSwitchedPartyOrderQuestLogEvent();
+        
         windowIds[0] = sPartyMenuBoxes[gPartyMenu.slotId].windowId;
         tSlot1Left = GetWindowAttribute(windowIds[0], WINDOW_TILEMAP_LEFT);
         tSlot1Top = GetWindowAttribute(windowIds[0], WINDOW_TILEMAP_TOP);
@@ -3554,15 +3537,6 @@ static void SwitchPartyMon(void)
     SwitchMenuBoxSprites(&menuBoxes[0]->statusSpriteId, &menuBoxes[1]->statusSpriteId);
 }
 
-static void SetSwitchedPartyOrderQuestLogEvent(void)
-{
-    struct QuestLogEvent_SwitchedPartyOrder * data = Alloc(sizeof(*data));
-
-    data->species1 = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES_OR_EGG);
-    data->species2 = GetMonData(&gPlayerParty[gPartyMenu.slotId2], MON_DATA_SPECIES_OR_EGG);
-    SetQuestLogEvent(QL_EVENT_SWITCHED_PARTY_ORDER, (const u16 *)data);
-    Free(data);
-}
 
 // Finish switching mons or using Softboiled
 static void FinishTwoMonAction(u8 taskId)
@@ -4156,7 +4130,6 @@ static void CursorCB_FieldMove(u8 taskId)
                 break;
             default:
                 gPartyMenu.exitCallback = CB2_ReturnToField;
-                SetUsedFieldMoveQuestLogEvent(&gPlayerParty[GetCursorSelectionMonId()], fieldMove);
                 Task_ClosePartyMenu(taskId);
                 break;
             }
@@ -4202,7 +4175,6 @@ static void Task_HandleFieldMoveExitAreaYesNoInput(u8 taskId)
     {
     case 0: // Yes
         gPartyMenu.exitCallback = CB2_ReturnToField;
-        SetUsedFieldMoveQuestLogEvent(&gPlayerParty[GetCursorSelectionMonId()], sPartyMenuInternal->data[0]);
         Task_ClosePartyMenu(taskId);
         break;
     case MENU_B_PRESSED:
@@ -4287,9 +4259,9 @@ static void DisplayCantUseSurfMessage(void)
         GetXYCoordsOneStepInFrontOfPlayer(&x, &y);
         if (MetatileBehavior_IsFastWater(MapGridGetMetatileBehaviorAt(x, y)) == TRUE)
             DisplayPartyMenuStdMessage(PARTY_MSG_CURRENT_TOO_FAST);
-        else if ((gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(ROUTE17))
-              && ((gSaveBlock1Ptr->location.mapNum == MAP_NUM(ROUTE17))
-                 || (gSaveBlock1Ptr->location.mapNum == MAP_NUM(ROUTE18))))
+        else if ((gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_ROUTE17))
+              && ((gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_ROUTE17))
+                 || (gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_ROUTE18))))
             DisplayPartyMenuStdMessage(PARTY_MSG_ENJOY_CYCLING);
         else
             DisplayPartyMenuStdMessage(PARTY_MSG_CANT_SURF_HERE);
@@ -4329,64 +4301,8 @@ bool32 FieldMove_SetUpWaterfall(void)
     return FALSE;
 }
 
-static void SetSwappedHeldItemQuestLogEvent(struct Pokemon *mon, u16 item, u16 item2)
-{
-    struct QuestLogEvent_SwappedHeldItem *data = Alloc(sizeof(*data));
 
-    data->species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
-    data->takenItemId = item;
-    data->givenItemId = item2;
-    // if (gPartyMenu.action == PARTY_ACTION_GIVE_PC_ITEM)
-    //     SetQuestLogEvent(QL_EVENT_SWAPPED_HELD_ITEM_PC, (void *)data);
-    // else
-        SetQuestLogEvent(QL_EVENT_SWAPPED_HELD_ITEM, (void *)data);
-    Free(data);
-}
 
-static void SetUsedFieldMoveQuestLogEvent(struct Pokemon *mon, u8 fieldMove)
-{
-    struct QuestLogEvent_FieldMove *data = Alloc(sizeof(*data));
-
-    data->species = GetMonData(mon, MON_DATA_SPECIES_OR_EGG);
-    data->fieldMove = fieldMove;
-    switch (data->fieldMove)
-    {
-    case FIELD_MOVE_TELEPORT:
-        data->mapSec = Overworld_GetMapHeaderByGroupAndId(gSaveBlock1Ptr->lastHealLocation.mapGroup, gSaveBlock1Ptr->lastHealLocation.mapNum)->regionMapSectionId;
-        break;
-    case FIELD_MOVE_DIG:
-        data->mapSec = gMapHeader.regionMapSectionId;
-        break;
-    default:
-        data->mapSec = 0xFF;
-    }
-    SetQuestLogEvent(QL_EVENT_USED_FIELD_MOVE, (const u16 *)data);
-    Free(data);
-}
-
-void SetUsedFlyQuestLogEvent(const u8 *healLocCtrlData)
-{
-    const struct MapHeader *mapHeader;
-    struct QuestLogEvent_FieldMove *data;
-    struct
-    {
-        s8 group;
-        s8 num;
-        u32 unused;
-    } *map = Alloc(sizeof(*map));
-
-    map->group = healLocCtrlData[0];
-    map->num = healLocCtrlData[1];
-    mapHeader = Overworld_GetMapHeaderByGroupAndId(map->group, map->num);
-    Free(map);
-
-    data = Alloc(sizeof(*data));
-    data->species = GetMonData(&gPlayerParty[GetCursorSelectionMonId()], MON_DATA_SPECIES_OR_EGG);
-    data->fieldMove = FIELD_MOVE_FLY;
-    data->mapSec = mapHeader->regionMapSectionId;
-    SetQuestLogEvent(QL_EVENT_USED_FIELD_MOVE, (const u16 *)data);
-    Free(data);
-}
 
 void CB2_ShowPartyMenuForItemUse(void)
 {
@@ -4504,7 +4420,6 @@ static void CB2_UseTMHMAfterForgettingMove(void)
         RemoveMonPPBonus(mon, moveIdx);
         SetMonMoveSlot(mon, ItemIdToBattleMoveId(gSpecialVar_ItemId), moveIdx);
         AdjustFriendship(mon, FRIENDSHIP_EVENT_LEARN_TMHM);
-        ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, gSpecialVar_ItemId, move);
         if (!ItemId_GetImportance(gSpecialVar_ItemId))
             RemoveBagItem(gSpecialVar_ItemId, 1);
         SetMainCallback2(gPartyMenu.exitCallback);
@@ -5302,7 +5217,6 @@ static void TryUseItemOnMove(u8 taskId) {
             gBattleStruct->itemPartyIndex[gBattlerInMenuId] = GetPartyIdFromBattleSlot(gPartyMenu.slotId);
             gBattleStruct->itemMoveIndex[gBattlerInMenuId] = ptr->data[0];
             gPartyMenuUseExitCallback = TRUE;
-            ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, gSpecialVar_ItemId, 0xFFFF);
             RemoveBagItem(gSpecialVar_ItemId, 1);
             ScheduleBgCopyTilemapToVram(2);
             gTasks[taskId].func = Task_ClosePartyMenuAfterText;
@@ -5339,7 +5253,6 @@ static void ItemUseCB_RestorePP(u8 taskId, TaskFunc func)
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
 
     gPartyMenuUseExitCallback = TRUE;
-    ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, gSpecialVar_ItemId, 0xFFFF);
     PlaySE(SE_USE_ITEM);
     RemoveBagItem(gSpecialVar_ItemId, 1);
     move = GetMonData(mon, gPartyMenu.ppMoveSlot + MON_DATA_MOVE1);
@@ -5430,7 +5343,6 @@ void ItemUseCB_TMHM(u8 taskId, TaskFunc func)
     }
     if (GiveMoveToMon(mon, learnMoveId) != MON_HAS_MAX_MOVES)
     {
-        ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, item, 0xFFFF);
         Task_DoUseItemAnim(taskId);
         gItemUseCB = ItemUseCB_LearnedMove;
     }
@@ -5573,7 +5485,6 @@ static void Task_ReplaceMoveWithTMHM(u8 taskId)
     u8 moveIdx = GetMoveSlotToReplace();
     u16 move = GetMonData(mon, moveIdx + MON_DATA_MOVE1);
 
-    ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, gSpecialVar_ItemId, move);
     GetMonNickname(mon, gStringVar1);
     StringCopy(gStringVar2, gMovesInfo[move].name);
     RemoveMonPPBonus(mon, moveIdx);
@@ -5738,7 +5649,6 @@ static void ItemUseCB_RareCandyStep(u8 taskId, TaskFunc func)
     }
 
     gPartyMenuUseExitCallback = TRUE;
-    ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, gSpecialVar_ItemId, 0xFFFF);
     UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
     RemoveBagItem(gSpecialVar_ItemId, 1);
     GetMonNickname(mon, gStringVar1);
@@ -6022,8 +5932,7 @@ static void UseSacredAsh(u8 taskId)
         return;
     }
     PlaySE(SE_USE_ITEM);
-    if (sPartyMenuInternal->tHadEffect == 0)
-        sSacredAshQuestLogMonBackup = mon;
+
     SetPartyMonAilmentGfx(mon, &sPartyMenuBoxes[gPartyMenu.slotId]);
     if (gSprites[sPartyMenuBoxes[gPartyMenu.slotId].statusSpriteId].invisible)
         DisplayPartyPokemonLevelCheck(mon, &sPartyMenuBoxes[gPartyMenu.slotId], DRAW_MENU_BOX_AND_TEXT);
@@ -6055,8 +5964,6 @@ static void Task_SacredAshLoop(u8 taskId)
             else
             {
                 gPartyMenuUseExitCallback = TRUE;
-                if (gPartyMenu.menuType != PARTY_MENU_TYPE_IN_BATTLE)
-                    ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, sSacredAshQuestLogMonBackup, gSpecialVar_ItemId, 0xFFFF);
                 RemoveBagItem(gSpecialVar_ItemId, 1);
             }
             gTasks[taskId].func = Task_ClosePartyMenuAfterText;
@@ -6104,7 +6011,6 @@ static void CB2_UseEvolutionStone(void)
     gCB2_AfterEvolution = gPartyMenu.exitCallback;
     targetSpecies = GetEvolutionTargetSpecies(&gPlayerParty[gPartyMenu.slotId], EVO_MODE_ITEM_USE, gSpecialVar_ItemId, NULL, NULL, CHECK_EVO);
     BeginEvolutionScene(&gPlayerParty[gPartyMenu.slotId], targetSpecies, FALSE, gPartyMenu.slotId);
-    ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, &gPlayerParty[gPartyMenu.slotId], gSpecialVar_ItemId, 0xFFFF);
     RemoveBagItem(gSpecialVar_ItemId, 1);
 }
 

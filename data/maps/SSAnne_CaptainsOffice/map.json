@@ -13,9 +13,10 @@
   "show_map_name": true,
   "floor_number": 0,
   "battle_scene": "MAP_BATTLE_SCENE_NORMAL",
-  "connections": 0,
+  "connections": null,
   "object_events": [
     {
+      "local_id": "LOCALID_SS_ANNE_CAPTAIN",
       "type": "object",
       "graphics_id": "OBJ_EVENT_GFX_CAPTAIN",
       "x": 5,
@@ -39,9 +40,7 @@
       "dest_warp_id": "2"
     }
   ],
-  "coord_events": [
-
-  ],
+  "coord_events": [],
   "bg_events": [
     {
       "type": "sign",

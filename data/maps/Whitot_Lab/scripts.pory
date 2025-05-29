@@ -1,0 +1,62 @@
+mapscripts Whitot_Lab_MapScripts {
+
+}
+script AlreayHasPokemon {
+	msgbox(format("I already have a Pokémon! \p What am I thinking?"))
+	releaseall
+	end
+}
+
+script Whitot_Lab_BALL4 {
+
+	lockall
+	if (flag(FLAG_SYS_POKEMON_GET)) {
+		goto(AlreayHasPokemon)
+	}
+	showmonpic(SPECIES_HOPPIP,10,3)
+	msgbox(format("This is the Pokémon Hoppip! \n Would you like it?"), MSGBOX_YESNO)
+	if (var(VAR_RESULT)) {
+		playfanfare(MUS_OBTAIN_KEY_ITEM)
+		givemon(SPECIES_HOPPIP, 5)
+		msgbox(format("Got the Pokémon Hoppip! \n Would you like to name it?"), MSGBOX_YESNO)
+		waitmessage
+		setflag(FLAG_SYS_POKEMON_GET)
+		if (var(VAR_RESULT)) {
+			releaseall
+			setvar(VAR_0x8004, 0)
+
+			call(EventScript_ChangePokemonNickname)
+		}
+	}
+	
+	else {
+		msgbox(format("You should look at different choices!"))
+	}
+	releaseall
+	end
+}
+
+script Whitot_Lab_BALL3 {
+	lockall
+	msgbox(format("This is the Pokémon Hoothoot! \n Would you like it?"), MSGBOX_YESNO)
+	waitmessage
+	releaseall
+	end
+}
+
+script Whitot_Lab_BALL2 {
+	lockall
+	msgbox(format("This is the Pokémon Wingull! \n Would you like it?"), MSGBOX_YESNO)
+	waitmessage
+	releaseall
+	end
+}
+
+
+script Whitot_Lab_BALL1 {
+	lockall
+	msgbox(format("This is the Pokémon Spheal \n Would you like it?"), MSGBOX_YESNO)
+	waitmessage
+	releaseall
+	end
+}

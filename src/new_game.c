@@ -8,7 +8,7 @@
 #include "tm_case.h"
 #include "berry_pouch.h"
 #include "clock.h"
-#include "quest_log.h"
+#include "field_specials.h"
 #include "wild_encounter.h"
 #include "event_data.h"
 #include "mail.h"
@@ -70,7 +70,7 @@ static void SetDefaultOptions(void)
     gSaveBlock2Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SHIFT;
     gSaveBlock2Ptr->optionsBattleSceneOff = FALSE;
     gSaveBlock2Ptr->regionMapZoom = FALSE;
-    gSaveBlock2Ptr->optionsButtonMode = OPTIONS_BUTTON_MODE_HELP;
+    gSaveBlock2Ptr->optionsButtonMode = 1;
 }
 
 static void ClearPokedexFlags(void)
@@ -86,7 +86,7 @@ static void ClearBattleTower(void)
 
 static void WarpToPlayersRoom(void)
 {
-    SetWarpDestination(MAP_GROUP(PALLET_TOWN_PLAYERS_HOUSE_2F), MAP_NUM(PALLET_TOWN_PLAYERS_HOUSE_2F), -1, 6, 6);
+    SetWarpDestination(MAP_GROUP(MAP_PLAYERS_HOUSE), MAP_NUM(MAP_PLAYERS_HOUSE), 2, 5, 6);
     WarpIntoMap();
 }
 
@@ -104,7 +104,6 @@ void ResetMenuAndMonGlobals(void)
     ResetBagCursorPositions();
     ResetTMCaseCursorPos();
     BerryPouch_CursorResetToTop();
-    ResetQuestLog();
     SeedWildEncounterRng(Random());
     ResetSpecialVars();
 }

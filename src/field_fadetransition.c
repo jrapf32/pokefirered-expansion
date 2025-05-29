@@ -11,7 +11,7 @@
 #include "cable_club.h"
 #include "fieldmap.h"
 #include "metatile_behavior.h"
-#include "quest_log.h"
+
 #include "link.h"
 #include "event_object_movement.h"
 #include "field_door.h"
@@ -278,7 +278,6 @@ static void ExitWarpFadeInScreen(bool8 playerNotMoving)
 void FieldCB_DefaultWarpExit(void)
 {
     Overworld_PlaySpecialMapMusic();
-    QuestLog_DrawPreviouslyOnQuestHeaderIfInPlaybackMode();
     SetUpWarpExitTask(FALSE);
     LockPlayerFieldControls();
 }
@@ -286,7 +285,6 @@ void FieldCB_DefaultWarpExit(void)
 void FieldCB_WarpExitFadeFromBlack(void)
 {
     Overworld_PlaySpecialMapMusic();
-    QuestLog_DrawPreviouslyOnQuestHeaderIfInPlaybackMode();
     SetUpWarpExitTask(TRUE);
     LockPlayerFieldControls();
 }
@@ -295,7 +293,6 @@ static void FieldCB_TeleportWarpIn(void)
 {
     Overworld_PlaySpecialMapMusic();
     WarpFadeInScreen();
-    QuestLog_DrawPreviouslyOnQuestHeaderIfInPlaybackMode();
     PlaySE(SE_WARP_OUT);
     CreateTask(Task_TeleportWarpIn, 10);
     LockPlayerFieldControls();
@@ -341,7 +338,7 @@ static void Task_ExitDoor(u8 taskId)
         {
             PlayerGetDestCoords(&task->data[12], &task->data[13]);
             SetPlayerVisibility(TRUE);
-            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_DOWN);
+            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_DOWN);
             task->data[0] = 8;
         }
         break;
@@ -356,7 +353,7 @@ static void Task_ExitDoor(u8 taskId)
     case 9:
         if (FieldFadeTransitionBackgroundEffectIsFinished() && IsPlayerStandingStill() && !FieldIsDoorAnimationRunning() && !FuncIsActiveTask(Task_BarnDoorWipe))
         {
-            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)]);
+            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)]);
             task->data[0] = 4;
         }
         break;
@@ -365,7 +362,7 @@ static void Task_ExitDoor(u8 taskId)
         if (FieldFadeTransitionBackgroundEffectIsFinished())
         {
             SetPlayerVisibility(TRUE);
-            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_DOWN);
+            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_DOWN);
             task->data[0] = 2;
         }
         break;
@@ -373,7 +370,7 @@ static void Task_ExitDoor(u8 taskId)
         if (IsPlayerStandingStill())
         {
             task->data[1] = FieldAnimateDoorClose(*x, *y);
-            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)]);
+            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)]);
             task->data[0] = 3;
         }
         break;
@@ -407,7 +404,7 @@ static void Task_ExitNonAnimDoor(u8 taskId)
         if (FieldFadeTransitionBackgroundEffectIsFinished())
         {
             SetPlayerVisibility(TRUE);
-            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)], GetWalkNormalMovementAction(GetPlayerFacingDirection()));
+            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)], GetWalkNormalMovementAction(GetPlayerFacingDirection()));
             task->data[0] = 2;
         }
         break;
@@ -744,8 +741,8 @@ static void Task_DoorWarp(u8 taskId)
     case 1:
         if (task->data[1] < 0 || gTasks[task->data[1]].isActive != TRUE)
         {
-            ObjectEventClearHeldMovementIfActive(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)]);
-            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_UP);
+            ObjectEventClearHeldMovementIfActive(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)]);
+            ObjectEventSetHeldMovement(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)], MOVEMENT_ACTION_WALK_NORMAL_UP);
             task->data[0] = 2;
         }
         break;
@@ -753,7 +750,7 @@ static void Task_DoorWarp(u8 taskId)
         if (IsPlayerStandingStill())
         {
             task->data[1] = FieldAnimateDoorClose(*xp, *yp - 1);
-            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(OBJ_EVENT_ID_PLAYER, 0, 0)]);
+            ObjectEventClearHeldMovementIfFinished(&gObjectEvents[GetObjectEventIdByLocalIdAndMap(LOCALID_PLAYER, 0, 0)]);
             SetPlayerVisibility(FALSE);
             task->data[0] = 3;
         }

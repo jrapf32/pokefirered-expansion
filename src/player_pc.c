@@ -6,7 +6,6 @@
 #include "strings.h"
 #include "menu.h"
 #include "mail.h"
-#include "help_system.h"
 #include "overworld.h"
 #include "script.h"
 #include "mailbox_pc.h"
@@ -152,7 +151,6 @@ void BedroomPC(void)
     u8 taskId;
 
     gPlayerPcMenuManager.notInRoom = FALSE;
-    BackupHelpContext();
     sItemOrder = sItemOrder_BedroomPC;
     sTopMenuItemCount = 3;
     taskId = CreateTask(TaskDummy, 0);
@@ -164,7 +162,6 @@ void PlayerPC(void)
     u8 taskId;
 
     gPlayerPcMenuManager.notInRoom = TRUE;
-    BackupHelpContext();
     sItemOrder = sItemOrder_PlayerPC;
     sTopMenuItemCount = 3;
     taskId = CreateTask(TaskDummy, 0);
@@ -213,7 +210,6 @@ static void Task_TopMenuHandleInput(u8 taskId)
 
 static void Task_ReturnToTopMenu(u8 taskId)
 {
-    RestoreHelpContext();
     DisplayItemMessageOnField(taskId, FONT_NORMAL, gText_WhatWouldYouLikeToDo, Task_DrawPlayerPcTopMenu);
 }
 
@@ -236,10 +232,6 @@ static void Task_PlayerPcMailbox(u8 taskId)
         gPlayerPcMenuManager.cursorPos = 0;
         PCMailCompaction();
         Task_SetPageItemVars(taskId);
-        if (gPlayerPcMenuManager.notInRoom == FALSE)
-            SetHelpContext(HELPCONTEXT_BEDROOM_PC_MAILBOX);
-        else
-            SetHelpContext(HELPCONTEXT_PLAYERS_PC_MAILBOX);
         if (MailboxPC_InitBuffers(gPlayerPcMenuManager.count) == TRUE)
         {
             ClearDialogWindowAndFrame(0, FALSE);
@@ -265,10 +257,6 @@ static void Task_PlayerPcTurnOff(u8 taskId)
 static void Task_CreateItemStorageSubmenu(u8 taskId, u8 cursorPos)
 {
     s16 *data = gTasks[taskId].data;
-    if (gPlayerPcMenuManager.notInRoom == FALSE)
-        SetHelpContext(HELPCONTEXT_BEDROOM_PC_ITEMS);
-    else
-        SetHelpContext(HELPCONTEXT_PLAYERS_PC_ITEMS);
     tWindowId = AddWindow(&sWindowTemplate_ItemStorageSubmenu);
     SetStandardWindowBorderStyle(tWindowId, FALSE);
     PrintMenuActionTextsAtPos(tWindowId, FONT_NORMAL, GetMenuCursorDimensionByFont(FONT_NORMAL, 0), 2, 16, 3, sMenuActions_ItemPc);
@@ -577,10 +565,6 @@ static void Task_WaitFadeAndReturnToMailboxPcInputHandler(u8 taskId)
 static void CB2_ReturnToMailbox(void)
 {
     u8 taskId;
-    if (gPlayerPcMenuManager.notInRoom == FALSE)
-        SetHelpContext(HELPCONTEXT_BEDROOM_PC_MAILBOX);
-    else
-        SetHelpContext(HELPCONTEXT_PLAYERS_PC_MAILBOX);
     LoadMessageBoxAndBorderGfx();
     taskId = CreateTask(Task_WaitFadeAndReturnToMailboxPcInputHandler, 0);
     if (MailboxPC_InitBuffers(gPlayerPcMenuManager.count) == TRUE)
@@ -680,10 +664,6 @@ static void CB2_ReturnToMailboxPc_UpdateScrollVariables(void)
 {
     u8 taskId;
     u8 count;
-    if (gPlayerPcMenuManager.notInRoom == FALSE)
-        SetHelpContext(HELPCONTEXT_BEDROOM_PC_MAILBOX);
-    else
-        SetHelpContext(HELPCONTEXT_PLAYERS_PC_MAILBOX);
     taskId = CreateTask(Task_WaitFadeAndReturnToMailboxPcInputHandler, 0);
     count = gPlayerPcMenuManager.count;
     gPlayerPcMenuManager.count = CountPCMail();

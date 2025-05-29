@@ -42,7 +42,9 @@
     "gMapGroup_IndoorFiveIslandRoute",
     "gMapGroup_IndoorTwoIslandRoute",
     "gMapGroup_IndoorSixIslandRoute",
-    "gMapGroup_IndoorSevenIslandRoute"
+    "gMapGroup_IndoorSevenIslandRoute",
+    "gMapGroup_TownAndRoutes_Whitoria",
+    "gMapGroup_Whitot"
   ],
   "gMapGroup_Link": [
     "BattleColosseum_2P",
@@ -554,5 +556,15 @@
   ],
   "gMapGroup_IndoorSevenIslandRoute": [
     "SevenIsland_SevaultCanyon_House"
+  ],
+  "gMapGroup_TownAndRoutes_Whitoria": [
+    "Inmald_Town",
+    "route_1",
+    "Ornki_Town",
+    "route_2"
+  ],
+  "gMapGroup_Whitot": [
+    "PlayersHouse",
+    "Whitot_Lab"
   ]
 }

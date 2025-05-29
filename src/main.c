@@ -1,7 +1,7 @@
 #include "global.h"
 #include "crt0.h"
 #include "malloc.h"
-#include "help_system.h"
+
 #include "link.h"
 #include "link_rfu.h"
 #include "librfu.h"
@@ -11,7 +11,7 @@
 #include "scanline_effect.h"
 #include "overworld.h"
 #include "play_time.h"
-#include "quest_log.h"
+
 #include "random.h"
 #include "save_failed_screen.h"
 #include "dma3.h"
@@ -106,16 +106,13 @@ void AgbMain()
     CheckForFlashMemory();
     InitMainCallbacks();
     InitMapMusic();
-#ifdef BUGFIX
     SeedRngWithRtc(); // see comment at SeedRngWithRtc definition below
-#endif
     ClearDma3Requests();
     ResetBgs();
     SetDefaultFontsPointer();
     InitHeap(gHeap, HEAP_SIZE);
 
     gSoftResetDisabled = FALSE;
-    gHelpSystemEnabled = FALSE;
 
     SetNotInSaveFailedScreen();
 
@@ -192,18 +189,10 @@ static void InitMainCallbacks(void)
     SetMainCallback2(gInitialMainCB2);
     gSaveBlock2Ptr = &gSaveblock2.block;
     gPokemonStoragePtr = &gPokemonStorage.block;
-    gQuestLogPlaybackState = QL_PLAYBACK_STATE_STOPPED;
 }
 
 static void CallCallbacks(void)
 {
-#if !TESTING && DEBUG_BATTLE_MENU != TRUE // test framework not working with help system
-    if (!RunSaveFailedScreen() && !RunHelpSystemCallback())
-#else
-#if !TESTING
-    if (!RunSaveFailedScreen())
-#endif
-#endif
     {
         if (gMain.callback1)
             gMain.callback1();

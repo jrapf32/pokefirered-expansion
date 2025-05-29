@@ -627,7 +627,7 @@
 	@ If localId is 0, then the id of the last-moved object will be used instead. If the specified object
 	@ is not currently being manipulated with applymovement, then this command does nothing.
 	@ If no map is specified, then the current map is used.
-	.macro waitmovement localId:req, map
+	.macro waitmovement localId=LOCALID_NONE, map
 		.ifb \map
 			.byte 0x51
 			.2byte \localId
@@ -2008,12 +2008,6 @@
 	.endm
 
 	@ Jumps to dest if the Quest Log is currently showing playback scenes (dest is usually a release/end)
-	.macro goto_if_questlog dest:req
-	special GetQuestLogState
-	compare VAR_RESULT, 2
-	goto_if_eq \dest
-	.endm
-
 	@ Prints a braille message, then waits for users input.
 	.macro braillemessage_wait text:req
 	setvar VAR_0x8006, 0

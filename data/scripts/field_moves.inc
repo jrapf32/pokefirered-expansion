@@ -1,5 +1,5 @@
 EventScript_CutTree::
-	goto_if_questlog EventScript_ReleaseEnd
+	
 	lockall
 	checkfieldmoveusable FIELD_MOVE_CUT
 	goto_if_eq VAR_RESULT, FALSE, EventScript_CantCutTree
@@ -58,7 +58,7 @@ EventScript_FldEffRockSmash::
 	goto EventScript_RockSmashCommon
 
 EventScript_RockSmash::
-	goto_if_questlog EventScript_ReleaseEnd
+	
 	lockall
 	checkfieldmoveusable FIELD_MOVE_ROCK_SMASH
 	goto_if_eq VAR_RESULT, FALSE, EventScript_CantSmashRock
@@ -87,7 +87,7 @@ EventScript_SmashRock:: @ fallthrough
 
 
 EventScript_FollowerFieldMove:
-	getdirectiontoface VAR_0x8005, OBJ_EVENT_ID_FOLLOWER, OBJ_EVENT_ID_PLAYER
+	getdirectiontoface VAR_0x8005, OBJ_EVENT_ID_FOLLOWER, LOCALID_PLAYER
 	specialvar VAR_0x8006, GetPlayerFacingDirection
 	goto_if_eq VAR_0x8005, DIR_NONE, EventScript_FollowerFieldMoveEnd
 	@ Swap follower and player
@@ -111,33 +111,33 @@ EventScript_FollowerSwap:
 
 EventScript_FollowerMoveNorth:
 	applymovement OBJ_EVENT_ID_FOLLOWER, Movement_WalkUp
-	applymovement OBJ_EVENT_ID_PLAYER, Movement_WalkDown
+	applymovement LOCALID_PLAYER, Movement_WalkDown
 	waitmovement 0
-	applymovement OBJ_EVENT_ID_PLAYER, Common_Movement_FaceUp
+	applymovement LOCALID_PLAYER, Common_Movement_FaceUp
 	waitmovement 0
 	return
 
 EventScript_FollowerMoveEast:
 	applymovement OBJ_EVENT_ID_FOLLOWER, Movement_WalkRight
-	applymovement OBJ_EVENT_ID_PLAYER, Movement_WalkLeft
+	applymovement LOCALID_PLAYER, Movement_WalkLeft
 	waitmovement 0
-	applymovement OBJ_EVENT_ID_PLAYER, Common_Movement_FaceRight
+	applymovement LOCALID_PLAYER, Common_Movement_FaceRight
 	waitmovement 0
 	return
 
 EventScript_FollowerMoveSouth:
 	applymovement OBJ_EVENT_ID_FOLLOWER, Movement_WalkDown
-	applymovement OBJ_EVENT_ID_PLAYER, Movement_WalkUp
+	applymovement LOCALID_PLAYER, Movement_WalkUp
 	waitmovement 0
-	applymovement OBJ_EVENT_ID_PLAYER, Common_Movement_FaceDown
+	applymovement LOCALID_PLAYER, Common_Movement_FaceDown
 	waitmovement 0
 	return
 
 EventScript_FollowerMoveWest:
 	applymovement OBJ_EVENT_ID_FOLLOWER, Movement_WalkLeft
-	applymovement OBJ_EVENT_ID_PLAYER, Movement_WalkRight
+	applymovement LOCALID_PLAYER, Movement_WalkRight
 	waitmovement 0
-	applymovement OBJ_EVENT_ID_PLAYER, Common_Movement_FaceLeft
+	applymovement LOCALID_PLAYER, Common_Movement_FaceLeft
 	waitmovement 0
 	return
 
@@ -219,7 +219,7 @@ Text_MonMaySmashRock::
 	.string "may be able to smash it.$"
 
 EventScript_StrengthBoulder::
-	goto_if_questlog EventScript_ReleaseEnd
+	
 	lockall
 	goto_if_set FLAG_SYS_USE_STRENGTH, EventScript_AlreadyUsedStrength
 	checkfieldmoveusable FIELD_MOVE_STRENGTH
@@ -276,7 +276,7 @@ Text_StrengthMadeMovingBouldersPossible::
 	.string "boulders around.$"
 
 EventScript_Waterfall::
-	goto_if_questlog EventScript_ReleaseEnd
+	
 	lockall
 	checkfieldmoveusable FIELD_MOVE_WATERFALL
 	goto_if_eq VAR_RESULT, FALSE, EventScript_WaterCrashingDown

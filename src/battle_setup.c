@@ -1,14 +1,14 @@
 #include "global.h"
 #include "task.h"
 #include "battle_setup.h"
-#include "help_system.h"
+
 #include "overworld.h"
 #include "item.h"
 #include "sound.h"
 #include "pokemon.h"
 #include "load_save.h"
 #include "safari_zone.h"
-#include "quest_log.h"
+
 #include "script.h"
 #include "script_pokemon_util.h"
 #include "strings.h"
@@ -89,7 +89,6 @@ static void Task_BattleStart(u8 taskId)
     case 0:
         if (!FldEffPoison_IsActive())
         {
-            HelpSystem_Disable();
             BattleTransition_StartOnField(tTransition);
             ++tState;
         }
@@ -97,7 +96,6 @@ static void Task_BattleStart(u8 taskId)
     case 1:
         if (IsBattleTransitionDone() == TRUE)
         {
-            HelpSystem_Enable();
             CleanupOverworldWindowsAndTilemaps();
             SetMainCallback2(CB2_InitBattle);
             RestartWildEncounterImmunitySteps();
@@ -125,7 +123,6 @@ static void Task_BattleStart_Debug(u8 taskId)
     case 0:
         if (!FldEffPoison_IsActive()) // is poison not active?
         {
-            HelpSystem_Disable();
             BattleTransition_StartOnField(tTransition);
             // ClearMirageTowerPulseBlendEffect();
             tState++; // go to case 1.
@@ -134,7 +131,6 @@ static void Task_BattleStart_Debug(u8 taskId)
     case 1:
         if (IsBattleTransitionDone() == TRUE)
         {
-            HelpSystem_Enable();
             CleanupOverworldWindowsAndTilemaps();
             SetMainCallback2(CB2_InitBattle);
             RestartWildEncounterImmunitySteps();
@@ -158,14 +154,14 @@ static void CreateBattleStartTask_Debug(u8 transition, u16 song)
 
 static bool8 CheckSilphScopeInPokemonTower(u16 mapGroup, u16 mapNum)
 {
-    if (mapGroup == MAP_GROUP(POKEMON_TOWER_1F)
-     && (mapNum == MAP_NUM(POKEMON_TOWER_1F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_2F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_3F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_4F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_5F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_6F)
-      || mapNum == MAP_NUM(POKEMON_TOWER_7F))
+    if (mapGroup == MAP_GROUP(MAP_POKEMON_TOWER_1F)
+     && (mapNum == MAP_NUM(MAP_POKEMON_TOWER_1F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_2F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_3F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_4F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_5F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_6F)
+      || mapNum == MAP_NUM(MAP_POKEMON_TOWER_7F))
      && !(CheckBagHasItem(ITEM_SILPH_SCOPE, 1)))
         return TRUE;
     else
@@ -703,12 +699,10 @@ const u8 *BattleSetup_ConfigureTrainerBattle(const u8 *data)
         return EventScript_TryDoDoubleTrainerBattle;
 #if FREE_MATCH_CALL == FALSE
     case TRAINER_BATTLE_REMATCH_DOUBLE:
-        QL_FinishRecordingScene();
         SetMapVarsToTrainerA();
         TRAINER_BATTLE_PARAM.opponentA = GetRematchTrainerId(TRAINER_BATTLE_PARAM.opponentA);
         return EventScript_TryDoDoubleRematchBattle;
     case TRAINER_BATTLE_REMATCH:
-        QL_FinishRecordingScene();
         SetMapVarsToTrainerA();
         TRAINER_BATTLE_PARAM.opponentA = GetRematchTrainerId(TRAINER_BATTLE_PARAM.opponentA);
         return EventScript_TryDoRematchBattle;
@@ -883,7 +877,6 @@ static void CB2_EndTrainerBattle(void)
             }
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
         else
         {
@@ -891,7 +884,6 @@ static void CB2_EndTrainerBattle(void)
             DowngradeBadPoison();
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
 
     }
@@ -911,7 +903,6 @@ static void CB2_EndTrainerBattle(void)
             SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
             DowngradeBadPoison();
             SetBattledTrainerFlag();
-            QuestLogEvents_HandleEndTrainerBattle();
         }
     }
 }
@@ -932,7 +923,6 @@ static void CB2_EndRematchBattle(void)
         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
         SetBattledTrainerFlag();
         ClearRematchStateOfLastTalked();
-        ResetDeferredLinkEvent();
         DowngradeBadPoison();
     }
 }
@@ -996,8 +986,7 @@ void PlayTrainerEncounterMusic(void)
     else
         trainerId = TRAINER_BATTLE_PARAM.opponentB;
 
-    if (!QL_IS_PLAYBACK_STATE
-     && GetTrainerBattleMode() != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
+    if (GetTrainerBattleMode() != TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
      && GetTrainerBattleMode() != TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC)
     {
         switch (GetTrainerEncounterMusicId(trainerId))

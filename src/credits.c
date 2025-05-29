@@ -10,7 +10,7 @@
 #include "trainer_pokemon_sprites.h"
 #include "menu.h"
 #include "field_weather.h"
-#include "quest_log.h"
+
 #include "constants/maps.h"
 #include "constants/field_weather.h"
 #include "constants/sound.h"
@@ -568,79 +568,79 @@ static const struct SpriteTemplate sGroundSpriteTemplate_Static = {
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_Route23[] = {
-    CREDITSOVWLDLOADMAP(ROUTE23, 11, 107, 1),
+    CREDITSOVWLDLOADMAP(MAP_ROUTE23, 11, 107, 1),
     CREDITSOVWLDSCROLL(0, 1, 0x0500), // Scroll down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_ViridianCity[] = {
-    CREDITSOVWLDLOADMAP(VIRIDIAN_CITY, 30, 34, 1),
+    CREDITSOVWLDLOADMAP(MAP_VIRIDIAN_CITY, 30, 34, 1),
     CREDITSOVWLDSCROLL(0, -1, 0x0500), // Scroll up
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_PewterCity[] = {
-    CREDITSOVWLDLOADMAP(PEWTER_CITY, 20, 26, 1),
+    CREDITSOVWLDLOADMAP(MAP_PEWTER_CITY, 20, 26, 1),
     CREDITSOVWLDSCROLL(0, -1, 0x0500), // Scroll up
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_CeruleanCity[] = {
-    CREDITSOVWLDLOADMAP(CERULEAN_CITY, 8, 6, 1),
+    CREDITSOVWLDLOADMAP(MAP_CERULEAN_CITY, 8, 6, 1),
     CREDITSOVWLDSCROLL(1, 1, 0x0500), // Scroll right and down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_Route25[] = {
-    CREDITSOVWLDLOADMAP(ROUTE25, 25, 6, 1),
+    CREDITSOVWLDLOADMAP(MAP_ROUTE25, 25, 6, 1),
     CREDITSOVWLDSCROLL(1, 0, 0x0500), // Scroll right
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_VermilionCity[] = {
-    CREDITSOVWLDLOADMAP(VERMILION_CITY, 9, 7, 1),
+    CREDITSOVWLDLOADMAP(MAP_VERMILION_CITY, 9, 7, 1),
     CREDITSOVWLDSCROLL(1, 1, 0x0500), // Scroll right and down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_Route10[] = {
-    CREDITSOVWLDLOADMAP(ROUTE10, 11, 68, 1),
+    CREDITSOVWLDLOADMAP(MAP_ROUTE10, 11, 68, 1),
     CREDITSOVWLDSCROLL(0, 1, 0x0500), // Scroll down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_CeladonCity[] = {
-    CREDITSOVWLDLOADMAP(CELADON_CITY, 48, 16, 1),
+    CREDITSOVWLDLOADMAP(MAP_CELADON_CITY, 48, 16, 1),
     CREDITSOVWLDSCROLL(-1, 0, 0x0500), // Scroll left
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_SaffronCity[] = {
-    CREDITSOVWLDLOADMAP(SAFFRON_CITY, 39, 5, 1),
+    CREDITSOVWLDLOADMAP(MAP_SAFFRON_CITY, 39, 5, 1),
     CREDITSOVWLDSCROLL(0, 1, 0x0500), // Scroll down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_Route17[] = {
-    CREDITSOVWLDLOADMAP(ROUTE17, 7, 43, 1),
+    CREDITSOVWLDLOADMAP(MAP_ROUTE17, 7, 43, 1),
     CREDITSOVWLDSCROLL(0, 1, 0x0500), // Scroll down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_FuchsiaCity[] = {
-    CREDITSOVWLDLOADMAP(FUCHSIA_CITY, 28, 5, 1),
+    CREDITSOVWLDLOADMAP(MAP_FUCHSIA_CITY, 28, 5, 1),
     CREDITSOVWLDSCROLL(0, 1, 0x0500), // Scroll down
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_CinnabarIsland[] = {
-    CREDITSOVWLDLOADMAP(CINNABAR_ISLAND, 13, 17, 1),
+    CREDITSOVWLDLOADMAP(MAP_CINNABAR_ISLAND, 13, 17, 1),
     CREDITSOVWLDSCROLL(0, -1, 0x0500), // Scroll up
     CREDITSOVWLDEND
 };
 
 static const struct CreditsOverworldCmd sOverworldCmd_Route21[] = {
-    CREDITSOVWLDLOADMAP(ROUTE21_NORTH, 8, 20, 1),
+    CREDITSOVWLDLOADMAP(MAP_ROUTE21_NORTH, 8, 20, 1),
     CREDITSOVWLDSCROLL(0, -1, 0x0500), // Scroll up
     CREDITSOVWLDEND,
 };
@@ -795,7 +795,7 @@ static bool32 DoOverworldMapScrollScene(u8 whichMon)
         sCreditsMgr->subseqno++;
         // fallthrough
     case 1:
-        if (!Overworld_DoScrollSceneForCredits(&sCreditsMgr->ovwldseqno, sOverworldMapScenes[sCreditsMgr->whichMon], QL_TINT_NONE))
+        if (!Overworld_DoScrollSceneForCredits(&sCreditsMgr->ovwldseqno, sOverworldMapScenes[sCreditsMgr->whichMon]))
             return FALSE;
         CreateCreditsWindow();
         SetGpuReg(REG_OFFSET_WIN0H, WIN_RANGE(0, DISPLAY_WIDTH));
